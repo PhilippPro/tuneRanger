@@ -1,45 +1,34 @@
-#' tuneRF
+
+
+#' Title
 #'
-#' @param task 
+#' @param formula 
+#' @param data 
 #' @param measure 
-#' @param iters 
-#' @param num.trees 
 #' @param num.threads 
+#' @param num.trees 
 #' @param replace 
+#' @param iters 
 #' @param save.file.path 
 #'
 #' @return
 #' @export
 #'
 #' @examples
-tuneRF = function(task, measure = NULL, iters = 100, num.trees = 1000, num.threads = 1, replace = TRUE, save.file.path = "./optpath.RData") {
-  
-  type = getTaskType(task)
-  size = getTaskSize(task)
-  NFeats = getTaskNFeats(task)
-  if(is.null(measure)) {
-    if(type == "classif")
-      measure = list(auc)
-    if(type == "regr")
-      measure = list(mse)
-  }
-  minimize = measure[[1]]$minimize
-  
-  # Evaluation function
+tuneRanger = function(formula, data, measure = measureMSE, num.threads = 1, num.trees = 1000, replace = TRUE, iters = 100, save.file.path = "./optpath.RData") {
   performan = function(x) {
-    x = c(x, num.trees = num.trees, num.threads = num.threads, respect.unordered.factors = TRUE, replace = TRUE)
-    lrn = makeLearner(paste0(type, ".ranger"), par.vals = x)
-    
-    mod = train(lrn, task)
-    preds = getOOBPreds(mod, task)
-    performance(preds, measures = measure)
+    pred = ranger(formula = formula, data = data,  mtry = x$mtry, min.node.size = x$min.node.size, 
+      sample.fraction = x$sample.fraction, replace = TRUE, num.trees = num.trees, 
+      respect.unordered.factors = TRUE, num.threads = num.threads)$predictions
+    target = all.vars(formula)[1]
+    return(measure(pred, train[, target]))
   }
   
   # Its ParamSet
   ps = makeParamSet(
-    makeIntegerParam("min.node.size", lower = 1, upper = round(size/4)),
+    makeIntegerParam("min.node.size", lower = 1, upper = round(nrow(data)/4)),
     makeNumericParam("sample.fraction", lower = 0.2, upper = 0.9),
-    makeIntegerParam("mtry", lower = 1, upper = NFeats)
+    makeIntegerParam("mtry", lower = 1, upper = ncol(data))
   )
   
   # Budget
@@ -61,7 +50,7 @@ tuneRF = function(task, measure = NULL, iters = 100, num.trees = 1000, num.threa
     has.simple.signature = FALSE,
     noisy = TRUE,
     n.objectives = 1,
-    minimize = minimize
+    minimize = TRUE
   )
   
   # Build the control object
@@ -91,4 +80,11 @@ tuneRF = function(task, measure = NULL, iters = 100, num.trees = 1000, num.threa
   res
 }
 
+
+
+
+
+measureMSE = function (truth, response) {
+  mean((response - truth)^2)
+}
 
