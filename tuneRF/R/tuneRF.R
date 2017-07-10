@@ -8,36 +8,41 @@
 #' @param replace 
 #' @param save.file.path 
 #'
-#' @return
+#' @return res
 #' @export
-#'
 #' @examples
-tuneRF = function(task, measure = NULL, iters = 100, num.trees = 1000, num.threads = 1, replace = TRUE, save.file.path = "./optpath.RData") {
+tuneRF = function(task, measure = NULL, iters = 100, num.trees = 1000, num.threads = 1, replace = TRUE, 
+  mbo.learner = NULL, save.file.path = "./optpath.RData") {
   
   type = getTaskType(task)
   size = getTaskSize(task)
   NFeats = getTaskNFeats(task)
+  predict.type = ifelse(type == "classif", "prob", "response")
   if(is.null(measure)) {
-    if(type == "classif")
+    if(type == "classif") {
       measure = list(auc)
-    if(type == "regr")
+    }
+    if(type == "regr") {
       measure = list(mse)
+    }
   }
   minimize = measure[[1]]$minimize
   
   # Evaluation function
   performan = function(x) {
     x = c(x, num.trees = num.trees, num.threads = num.threads, respect.unordered.factors = TRUE, replace = TRUE)
-    lrn = makeLearner(paste0(type, ".ranger"), par.vals = x)
+    lrn = makeLearner(paste0(type, ".ranger"), par.vals = x, predict.type = predict.type)
     
     mod = train(lrn, task)
     preds = getOOBPreds(mod, task)
     performance(preds, measures = measure)
   }
   
+  trafo_nodesize = function(x) ceiling(2^(log(size, 2) * x))
+  
   # Its ParamSet
   ps = makeParamSet(
-    makeIntegerParam("min.node.size", lower = 1, upper = round(size/4)),
+    makeNumericParam("min.node.size", lower = 0, upper = 1, trafo = trafo_nodesize), 
     makeNumericParam("sample.fraction", lower = 0.2, upper = 0.9),
     makeIntegerParam("mtry", lower = 1, upper = NFeats)
   )
@@ -80,7 +85,7 @@ tuneRF = function(task, measure = NULL, iters = 100, num.trees = 1000, num.threa
     opt.focussearch.points = mbo.focussearch.points,
     opt.restarts = mbo.focussearch.restarts)
   
-  mbo.learner = makeLearner("regr.randomForest", predict.type = "se")
+  #mbo.learner = makeLearner("regr.randomForest", predict.type = "se")
   
   design = generateDesign(mbo.init.design.size, getParamSet(objFun), fun = lhs::maximinLHS)
   
@@ -88,6 +93,7 @@ tuneRF = function(task, measure = NULL, iters = 100, num.trees = 1000, num.threa
   result = mbo(fun = objFun, design = design, learner = mbo.learner, control = control)
   
   res = data.frame(result$opt.path)
+  res$min.node.size = trafo_nodesize(res$min.node.size)
   res
 }
 

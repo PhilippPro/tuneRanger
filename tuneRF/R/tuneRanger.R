@@ -1,6 +1,4 @@
-
-
-#' Title
+#' tuneRanger
 #'
 #' @param formula 
 #' @param data 
@@ -11,11 +9,13 @@
 #' @param iters 
 #' @param save.file.path 
 #'
-#' @return
+#' @return res
 #' @export
-#'
 #' @examples
 tuneRanger = function(formula, data, measure = measureMSE, num.threads = 1, num.trees = 1000, replace = TRUE, iters = 100, save.file.path = "./optpath.RData") {
+  
+  size = nrow(data)
+  
   performan = function(x) {
     pred = ranger(formula = formula, data = data,  mtry = x$mtry, min.node.size = x$min.node.size, 
       sample.fraction = x$sample.fraction, replace = TRUE, num.trees = num.trees, 
@@ -24,9 +24,11 @@ tuneRanger = function(formula, data, measure = measureMSE, num.threads = 1, num.
     return(measure(pred, train[, target]))
   }
   
+  trafo_nodesize = function(x) ceiling(2^(log(size, 2) * x))
+  
   # Its ParamSet
   ps = makeParamSet(
-    makeIntegerParam("min.node.size", lower = 1, upper = round(nrow(data)/4)),
+    makeIntegerParam("min.node.size", lower = -10, upper = 0, trafo = trafo_nodesize),
     makeNumericParam("sample.fraction", lower = 0.2, upper = 0.9),
     makeIntegerParam("mtry", lower = 1, upper = ncol(data))
   )
@@ -77,6 +79,7 @@ tuneRanger = function(formula, data, measure = measureMSE, num.threads = 1, num.
   result = mbo(fun = objFun, design = design, learner = mbo.learner, control = control)
   
   res = data.frame(result$opt.path)
+  res$min.node.size = trafo_nodesize(res$min.node.size)
   res
 }
 

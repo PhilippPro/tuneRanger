@@ -1,4 +1,17 @@
 
+#' estimateTuneRangerTime
+#'
+#' @param formula 
+#' @param data 
+#' @param iters 
+#' @param num.threads 
+#' @param num.trees 
+#' @param respect.unordered.factors 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 estimateTuneRangerTime = function(formula, data, iters = 100, num.threads = 1, num.trees = 1000, respect.unordered.factors = TRUE) {
   time = system.time(ranger(formula, data, num.threads = num.threads, 
     num.trees = num.trees, respect.unordered.factors = respect.unordered.factors))[3]
