@@ -4,27 +4,43 @@
 \alias{tuneRF}
 \title{tuneRF}
 \usage{
-tuneRF(task, measure = NULL, iters = 100, num.trees = 1000,
-  num.threads = 1, replace = TRUE, save.file.path = "./optpath.RData")
+tuneRF(task, measure = NULL, iters = 100, num.threads = 1,
+  num.trees = 1000, replace = TRUE, save.file.path = "./optpath.RData")
 }
 \arguments{
-\item{task}{}
+\item{task}{The mlr task created by makeClassifTask or makeRegrTask.}
 
-\item{measure}{}
+\item{measure}{Performance measure to evaluate. Default is auc for classification and mse for regression. Other possible performance measures can be looked up here: https://mlr-org.github.io/mlr-tutorial/release/html/performance/index.html}
 
-\item{iters}{}
+\item{iters}{Number of iterations.}
 
-\item{num.trees}{}
+\item{num.threads}{Number of threads. Default is 1.}
 
-\item{num.threads}{}
+\item{num.trees}{Number of trees.}
 
-\item{replace}{}
+\item{replace}{Sample with replacement.}
 
-\item{save.file.path}{}
+\item{save.file.path}{File to which interim results are saved.}
 }
 \value{
-res
+data.frame with all evaluated hyperparameters and performance and time results for each run
 }
 \description{
 tuneRF
+}
+\examples{
+library(tuneRF)
+library(mlr)
+# iris is a bit nonsense here
+# A mlr task has to be created in order to use the package
+
+# the already existing iris task is used here
+unlink("./optpath.RData")
+estimateTuneRFTime(iris.task)
+
+res = tuneRF(iris.task, measure = list(multiclass.brier), num.trees = 1000, 
+  num.threads = 8, iters = 100)
+  
+# Best 5 \% of the results
+res[res$multiclass.brier < quantile(res$multiclass.brier, 0.05),]
 }

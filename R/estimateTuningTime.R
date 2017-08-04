@@ -1,15 +1,22 @@
 #' estimateTuneRFTime
 #'
-#' @param task
-#' @param iters 
-#' @param num.threads 
-#' @param num.trees 
-#' @param respect.unordered.factors 
-#'
-#' @return
+#' @param task The mlr task created by makeClassifTask or makeRegrTask. 
+#' @param iters Number of iterations. 
+#' @param num.threads Number of threads. Default is 1.
+#' @param num.trees Number of trees.
+#' @param respect.unordered.factors Handling of unordered factor covariates. One of 'ignore', 'order' and 'partition'. For the "extratrees" splitrule the default is "partition" for all other splitrules 'ignore'. Alternatively TRUE (='order') or FALSE (='ignore') can be used. See below for details.
+#' @return estimated time for the tuning procedure
 #' @export
-#'
-#' @examples
+#' 
+#' library(devtools)
+#' load_all("../tuneRF")
+#' roxygen2::roxygenise("../tuneRF")
+# install("tuneRF")
+#' 
+#' # iris is a bit nonsense here
+#' unlink("./optpath.RData")
+#' estimateTuneRFTime(iris.task)
+
 estimateTuneRFTime = function(task, iters = 100, num.threads = 1, num.trees = 1000, respect.unordered.factors = TRUE) {
   type = getTaskType(task)
   predict.type = ifelse(type == "classif", "prob", "response")
@@ -17,6 +24,7 @@ estimateTuneRFTime = function(task, iters = 100, num.threads = 1, num.trees = 10
   lrn = makeLearner(paste0(type, ".ranger"), par.vals = par.vals, predict.type = predict.type)
   time = system.time(train(lrn, task))[3]
   cat(paste("Approximated time for tuning:", my_seconds_to_period(time * iters + 100)))
+  invisible(time*iters + 100)
 }
 
 #' estimateTuneRangerTime
@@ -28,10 +36,8 @@ estimateTuneRFTime = function(task, iters = 100, num.threads = 1, num.trees = 10
 #' @param num.trees 
 #' @param respect.unordered.factors 
 #'
-#' @return
+#' @return estimated time for the tuning procedure
 #' @export
-#'
-#' @examples
 estimateTuneRangerTime = function(formula, data, iters = 100, num.threads = 1, num.trees = 1000, respect.unordered.factors = TRUE) {
   time = system.time(ranger(formula, data, num.threads = num.threads, 
     num.trees = num.trees, respect.unordered.factors = respect.unordered.factors))[3]

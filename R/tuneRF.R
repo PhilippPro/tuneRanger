@@ -1,18 +1,31 @@
 #' tuneRF
 #'
-#' @param task 
-#' @param measure 
-#' @param iters 
-#' @param num.trees 
-#' @param num.threads 
-#' @param replace 
-#' @param save.file.path 
-#'
-#' @return res
+#' @param task The mlr task created by makeClassifTask or makeRegrTask. 
+#' @param measure Performance measure to evaluate. Default is auc for classification and mse for regression. Other possible performance measures can be looked up here: https://mlr-org.github.io/mlr-tutorial/release/html/performance/index.html
+#' @param iters Number of iterations. 
+#' @param num.threads Number of threads. Default is 1.
+#' @param num.trees Number of trees.
+#' @param replace Sample with replacement.
+#' @param save.file.path File to which interim results are saved.
+#' @return data.frame with all evaluated hyperparameters and performance and time results for each run
 #' @export
-#' @examples
-tuneRF = function(task, measure = NULL, iters = 100, num.trees = 1000, num.threads = 1, replace = TRUE, 
-  mbo.learner = NULL, save.file.path = "./optpath.RData") {
+#' @examples 
+#' library(tuneRF)
+#' library(mlr)
+#' # iris is a bit nonsense here
+#' # A mlr task has to be created in order to use the package
+#' 
+#' # the already existing iris task is used here
+#' unlink("./optpath.RData")
+#' estimateTuneRFTime(iris.task)
+#' 
+#' res = tuneRF(iris.task, measure = list(multiclass.brier), num.trees = 1000, 
+#'   num.threads = 8, iters = 100)
+#'   
+#' # Best 5 % of the results
+#' res[res$multiclass.brier < quantile(res$multiclass.brier, 0.05),]
+tuneRF = function(task, measure = NULL, iters = 100, num.threads = 1, num.trees = 1000, replace = TRUE, 
+  save.file.path = "./optpath.RData") {
   
   type = getTaskType(task)
   size = getTaskSize(task)

@@ -20,6 +20,9 @@ estimateTuneRangerTime(formula, data, iters = 100, num.threads = 1,
 
 \item{respect.unordered.factors}{}
 }
+\value{
+estimated time for the tuning procedure
+}
 \description{
 estimateTuneRangerTime
 }

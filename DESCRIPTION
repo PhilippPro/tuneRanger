@@ -4,7 +4,6 @@ Title: tune random forest
 Description: More about what it does (maybe more than one line)
 Version: 0.1
 Authors@R: person("Philipp", "Probst", email = "philipp_probst@gmx.de", role = c("aut", "cre"))
-License: What license is it under?
 License: GPL-3
 Encoding: UTF-8
 Depends:
@@ -15,7 +14,7 @@ Depends:
     lubridate
 LazyData: yes
 ByteCompile: yes
-Version: 0.1
 Date: 2017-06-30
 RoxygenNote: 6.0.1
-Suggests: testthat
+Suggests:
+    testthat

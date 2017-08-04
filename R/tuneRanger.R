@@ -11,7 +11,6 @@
 #'
 #' @return res
 #' @export
-#' @examples
 tuneRanger = function(formula, data, measure = measureMSE, num.threads = 1, num.trees = 1000, replace = TRUE, iters = 100, save.file.path = "./optpath.RData") {
   
   size = nrow(data)
