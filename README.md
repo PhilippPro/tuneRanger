@@ -26,7 +26,8 @@ Quickstart:
     library(mlr)
 
     # iris is a bit nonsense here
-    # A mlr task has to be created in order to use the package; the already existing iris task is used here
+    # A mlr task has to be created in order to use the package
+    # the already existing iris task is used here
     unlink("./optpath.RData")
     estimateTuneRFTime(iris.task)
     res = tuneRF(iris.task, measure = list(multiclass.brier), num.trees = 1000, 
