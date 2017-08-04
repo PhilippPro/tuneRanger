@@ -6,7 +6,7 @@
 #' @param num.threads Number of threads. Default is 1.
 #' @param num.trees Number of trees.
 #' @param replace Sample with replacement.
-#' @param save.file.path File to which interim results are saved.
+#' @param save.file.path File to which interim results are saved. Default is optpath.RData in the current working directory.
 #' @return data.frame with all evaluated hyperparameters and performance and time results for each run
 #' @export
 #' @examples 

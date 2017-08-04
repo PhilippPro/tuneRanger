@@ -20,7 +20,7 @@ tuneRF(task, measure = NULL, iters = 100, num.threads = 1,
 
 \item{replace}{Sample with replacement.}
 
-\item{save.file.path}{File to which interim results are saved.}
+\item{save.file.path}{File to which interim results are saved. Default is optpath.RData in the current working directory.}
 }
 \value{
 data.frame with all evaluated hyperparameters and performance and time results for each run
