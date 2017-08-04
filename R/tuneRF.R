@@ -94,7 +94,9 @@ tuneRF = function(task, measure = NULL, iters = 100, num.trees = 1000, num.threa
   
   res = data.frame(result$opt.path)
   res$min.node.size = trafo_nodesize(res$min.node.size)
-  res
+  
+  colnames(res)[4] = measure[[1]]$id
+  res[, c("min.node.size", "sample.fraction", "mtry", measure[[1]]$id, "exec.time")]
 }
 
 
