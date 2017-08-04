@@ -8,7 +8,7 @@ tuneRF(task, measure = NULL, iters = 100, num.threads = 1,
   num.trees = 1000, replace = TRUE, save.file.path = "./optpath.RData")
 }
 \arguments{
-\item{task}{The mlr task created by makeClassifTask or makeRegrTask.}
+\item{task}{The mlr task created by \code{\link[mlr]{makeClassifTask}} or \code{\link[mlr]{makeRegrTask}}.}
 
 \item{measure}{Performance measure to evaluate. Default is auc for classification and mse for regression. Other possible performance measures can be looked up here: https://mlr-org.github.io/mlr-tutorial/release/html/performance/index.html}
 

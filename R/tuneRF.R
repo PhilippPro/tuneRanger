@@ -1,6 +1,6 @@
 #' tuneRF
 #'
-#' @param task The mlr task created by makeClassifTask or makeRegrTask. 
+#' @param task The mlr task created by \code{\link[mlr]{makeClassifTask}} or \code{\link[mlr]{makeRegrTask}}. 
 #' @param measure Performance measure to evaluate. Default is auc for classification and mse for regression. Other possible performance measures can be looked up here: https://mlr-org.github.io/mlr-tutorial/release/html/performance/index.html
 #' @param iters Number of iterations. 
 #' @param num.threads Number of threads. Default is 1.
