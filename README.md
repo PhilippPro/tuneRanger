@@ -13,7 +13,8 @@ The measure that should be optimized can be chosen from the list of measures in 
 The package is mainly based on [ranger](https://github.com/imbs-hl/ranger), [mlrMBO](http://mlr-org.github.io/mlrMBO/) and [mlr](https://github.com/mlr-org/mlr/#-machine-learning-in-r). 
 
 ## Installation
-* Install the development version
+The development version
+
     ```r
     devtools::install_github("PhilippPro/tuneRF")
     ```
