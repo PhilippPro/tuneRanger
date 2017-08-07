@@ -15,14 +15,13 @@ The package is mainly based on [ranger](https://github.com/imbs-hl/ranger), [mlr
 ## Installation
 The development version
 
-    ```r
+    
     devtools::install_github("PhilippPro/tuneRF")
-    ```
+    
     
 ## Usage
 Quickstart:
 
-    ```r
     library(tuneRF)
     library(mlr)
 
@@ -36,4 +35,4 @@ Quickstart:
 
     # Best 5 % of the results
     res[res$multiclass.brier < quantile(res$multiclass.brier, 0.05),]
-    ```
+    
