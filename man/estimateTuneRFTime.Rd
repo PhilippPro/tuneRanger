@@ -24,3 +24,12 @@ estimated time for the tuning procedure
 \description{
 estimateTuneRFTime
 }
+\examples{
+library(devtools)
+load_all("../tuneRF")
+roxygen2::roxygenise("../tuneRF")
+
+# iris is a bit nonsense here
+unlink("./optpath.RData")
+estimateTuneRFTime(iris.task)
+}

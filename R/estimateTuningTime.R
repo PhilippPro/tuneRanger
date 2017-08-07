@@ -7,7 +7,7 @@
 #' @param respect.unordered.factors Handling of unordered factor covariates. One of 'ignore', 'order' and 'partition'. For the "extratrees" splitrule the default is "partition" for all other splitrules 'ignore'. Alternatively TRUE (='order') or FALSE (='ignore') can be used. See below for details.
 #' @return estimated time for the tuning procedure
 #' @export
-#' 
+#' @examples
 #' library(devtools)
 #' load_all("../tuneRF")
 #' roxygen2::roxygenise("../tuneRF")
@@ -16,7 +16,6 @@
 #' # iris is a bit nonsense here
 #' unlink("./optpath.RData")
 #' estimateTuneRFTime(iris.task)
-
 estimateTuneRFTime = function(task, iters = 100, num.threads = 1, num.trees = 1000, respect.unordered.factors = TRUE) {
   type = getTaskType(task)
   predict.type = ifelse(type == "classif", "prob", "response")

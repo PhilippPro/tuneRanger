@@ -103,7 +103,7 @@ tuneRF = function(task, measure = NULL, iters = 100, num.threads = 1, num.trees 
   design = generateDesign(mbo.init.design.size, getParamSet(objFun), fun = lhs::maximinLHS)
   
   set.seed(123)
-  result = mbo(fun = objFun, design = design, learner = mbo.learner, control = control)
+  result = mbo(fun = objFun, design = design, learner = NULL, control = control)
   
   res = data.frame(result$opt.path)
   res$min.node.size = trafo_nodesize(res$min.node.size)
