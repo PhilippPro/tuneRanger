@@ -8,10 +8,12 @@ License: GPL-3
 Encoding: UTF-8
 Depends:
     R (>= 3.0.2),
-    ranger,
+    ranger (>= 0.8.0),
     mlr (>= 2.0),
     mlrMBO (>= 1.1.0),
-    lubridate
+    lubridate (>= 1.6.0), 
+    DiceKriging (>= 1.5.5),
+    rgenoud (>= 5.7-12.4)
 LazyData: yes
 ByteCompile: yes
 Date: 2017-06-30

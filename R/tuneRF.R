@@ -6,7 +6,8 @@
 #' @param num.threads Number of threads. Default is 1.
 #' @param num.trees Number of trees.
 #' @param replace Sample with replacement.
-#' @param save.file.path File to which interim results are saved. Default is optpath.RData in the current working directory.
+#' @param save.file.path File to which interim results are saved. Default is optpath.RData in the current working 
+#' directory. If one iteration fails the algorithm can be started again with \code{\link[mlr]{makeRegrTask}}
 #' @return data.frame with all evaluated hyperparameters and performance and time results for each run
 #' @export
 #' @examples 
@@ -27,9 +28,13 @@
 tuneRF = function(task, measure = NULL, iters = 100, num.threads = 1, num.trees = 1000, replace = TRUE, 
   save.file.path = "./optpath.RData") {
   
+  unlink(save.file.path)
+  
   type = getTaskType(task)
   size = getTaskSize(task)
   NFeats = getTaskNFeats(task)
+  measure.name = measure[[1]]$id
+  
   predict.type = ifelse(type == "classif", "prob", "response")
   if(is.null(measure)) {
     if(type == "classif") {
@@ -51,8 +56,8 @@ tuneRF = function(task, measure = NULL, iters = 100, num.threads = 1, num.trees 
     performance(preds, measures = measure)
   }
   
+  # Transformation of nodesize
   trafo_nodesize = function(x) ceiling(2^(log(size, 2) * x))
-  
   # Its ParamSet
   ps = makeParamSet(
     makeNumericParam("min.node.size", lower = 0, upper = 1, trafo = trafo_nodesize), 
@@ -106,10 +111,15 @@ tuneRF = function(task, measure = NULL, iters = 100, num.threads = 1, num.trees 
   result = mbo(fun = objFun, design = design, learner = NULL, control = control)
   
   res = data.frame(result$opt.path)
-  res$min.node.size = trafo_nodesize(res$min.node.size)
+  res$min.node.size = trafo_nodesize_end(res$min.node.size, size)
   
-  colnames(res)[4] = measure[[1]]$id
-  res[, c("min.node.size", "sample.fraction", "mtry", measure[[1]]$id, "exec.time")]
+  colnames(res)[colnames(res) == "y"] = measure.name
+  res = res[, c("min.node.size", "sample.fraction", "mtry", measure.name, "exec.time")]
+  recommendation = colMeans(res[res[, measure.name] < quantile(res[, measure.name], 0.05),])
+  recommendation[c("min.node.size", "mtry")] = round(recommendation[c("min.node.size", "mtry")])
+  
+  list(recommendation = recommendation, results = res)
 }
 
-
+#' @export
+trafo_nodesize_end = function(x, size) ceiling(2^(log(size, 2) * x))

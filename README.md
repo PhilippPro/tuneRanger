@@ -34,5 +34,9 @@ Quickstart:
                  num.threads = 8, iters = 100)
 
     # Best 5 % of the results
-    res[res$multiclass.brier < quantile(res$multiclass.brier, 0.05),]
-    
+    results = res$results
+    results[results$multiclass.brier < quantile(results$multiclass.brier, 0.05),]
+
+
+    # Restart after failing in one of the iterations:
+    res = restartTuneRF("./optpath.RData", iris.task, measure = list(multiclass.brier))
