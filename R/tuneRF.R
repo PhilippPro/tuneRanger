@@ -91,7 +91,7 @@ tuneRF = function(task, measure = NULL, iters = 100, num.threads = 1, num.trees 
   }
   
   control = makeMBOControl(n.objectives = 1L, propose.points = mbo.prop.points, impute.y.fun = function(x, y, opt.path) 0.7, 
-    save.on.disk.at = 1:10, save.file.path = save.file.path)
+    save.on.disk.at = 1:(iters-30), save.file.path = save.file.path)
   control = setMBOControlTermination(control, max.evals =  f.evals, iters = 300)
   control = setMBOControlInfill(control, #opt = infill.opt,
     opt.focussearch.maxit = mbo.focussearch.maxit,

@@ -10,8 +10,9 @@ res = tuneRF(iris.task, measure = list(multiclass.brier), num.trees = 1000, num.
 
 res[res$multiclass.brier < quantile(res$multiclass.brier, 0.05),]
 
-
-
+# Restart after failing in one iteration:
+load("./optpath.RData")
+mboContinue("./optpath.RData")
 
 
 # Annex
