@@ -1,7 +1,7 @@
 library(devtools)
 load_all("../tuneRF")
 # roxygen2::roxygenise("../tuneRF")
-# install("../tuneRF")
+# install("../tuneRF", dependencies = character(0))
 
 # iris is a bit nonsense here
 estimateTuneRFTime(iris.task)

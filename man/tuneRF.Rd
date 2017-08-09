@@ -21,7 +21,7 @@ tuneRF(task, measure = NULL, iters = 100, num.threads = 1,
 \item{replace}{Sample with replacement.}
 
 \item{save.file.path}{File to which interim results are saved. Default is optpath.RData in the current working 
-directory. If one iteration fails the algorithm can be started again with \code{\link[mlr]{makeRegrTask}}}
+directory. If one iteration fails the algorithm can be started again with \code{\link{restartTuneRF}}.}
 }
 \value{
 list with recommendation parameters and data.frame with all evaluated hyperparameters and performance and time results for each run

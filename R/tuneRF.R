@@ -9,7 +9,7 @@
 #' @param num.trees Number of trees.
 #' @param replace Sample with replacement.
 #' @param save.file.path File to which interim results are saved. Default is optpath.RData in the current working 
-#' directory. If one iteration fails the algorithm can be started again with \code{\link[mlr]{makeRegrTask}}
+#' directory. If one iteration fails the algorithm can be started again with \code{\link{restartTuneRF}}.
 #' @return list with recommendation parameters and data.frame with all evaluated hyperparameters and performance and time results for each run
 #' @details Model based optimization is used as tuning strategy and the three parameters min.node.size, sample.fraction and mtry are tuned at once. Out-of-bag predictions are used for evaluation, which makes it much faster than other packages and tuning strategies that use for example 5-fold cross-validation. Classification as well as regression is supported. 
 #' The measure that should be optimized can be chosen from the list of measures in mlr: http://mlr-org.github.io/mlr-tutorial/devel/html/measures/index.html
@@ -123,6 +123,11 @@ tuneRF = function(task, measure = NULL, iters = 100, num.threads = 1, num.trees 
   recommendation[c("min.node.size", "mtry")] = round(recommendation[c("min.node.size", "mtry")])
   
   list(recommendation = recommendation, results = res)
+}
+
+print.tuneRF = function(x) {
+  cat("Recommended parameter settings:")
+  cat(x$recommendation)
 }
 
 #' @export
