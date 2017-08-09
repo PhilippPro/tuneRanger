@@ -2,5 +2,7 @@
 
 export(estimateTuneRFTime)
 export(estimateTuneRangerTime)
+export(restartTuneRF)
+export(trafo_nodesize_end)
 export(tuneRF)
 export(tuneRanger)

@@ -20,13 +20,18 @@ tuneRF(task, measure = NULL, iters = 100, num.threads = 1,
 
 \item{replace}{Sample with replacement.}
 
-\item{save.file.path}{File to which interim results are saved. Default is optpath.RData in the current working directory.}
+\item{save.file.path}{File to which interim results are saved. Default is optpath.RData in the current working 
+directory. If one iteration fails the algorithm can be started again with \code{\link[mlr]{makeRegrTask}}}
 }
 \value{
-data.frame with all evaluated hyperparameters and performance and time results for each run
+list with recommendation parameters and data.frame with all evaluated hyperparameters and performance and time results for each run
 }
 \description{
-tuneRF
+Automatic tuning of random forests with one line of code.
+}
+\details{
+Model based optimization is used as tuning strategy and the three parameters min.node.size, sample.fraction and mtry are tuned at once. Out-of-bag predictions are used for evaluation, which makes it much faster than other packages and tuning strategies that use for example 5-fold cross-validation. Classification as well as regression is supported. 
+The measure that should be optimized can be chosen from the list of measures in mlr: http://mlr-org.github.io/mlr-tutorial/devel/html/measures/index.html
 }
 \examples{
 library(tuneRF)
