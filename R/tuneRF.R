@@ -10,7 +10,7 @@
 #' @param replace Sample with replacement.
 #' @param save.file.path File to which interim results are saved. Default is optpath.RData in the current working 
 #' directory. If one iteration fails the algorithm can be started again with \code{\link{restartTuneRF}}.
-#' @return list with recommendation parameters and data.frame with all evaluated hyperparameters and performance and time results for each run
+#' @return list with recommended parameters, a trained model with these paramters and a data.frame with all evaluated hyperparameters and performance and time results for each run
 #' @details Model based optimization is used as tuning strategy and the three parameters min.node.size, sample.fraction and mtry are tuned at once. Out-of-bag predictions are used for evaluation, which makes it much faster than other packages and tuning strategies that use for example 5-fold cross-validation. Classification as well as regression is supported. 
 #' The measure that should be optimized can be chosen from the list of measures in mlr: http://mlr-org.github.io/mlr-tutorial/devel/html/measures/index.html
 #' @export
@@ -54,7 +54,6 @@ tuneRF = function(task, measure = NULL, iters = 100, num.threads = 1, num.trees 
   performan = function(x) {
     x = c(x, num.trees = num.trees, num.threads = num.threads, respect.unordered.factors = TRUE, replace = TRUE)
     lrn = makeLearner(paste0(type, ".ranger"), par.vals = x, predict.type = predict.type)
-    
     mod = train(lrn, task)
     preds = getOOBPreds(mod, task)
     performance(preds, measures = measure)
@@ -119,15 +118,24 @@ tuneRF = function(task, measure = NULL, iters = 100, num.threads = 1, num.trees 
   
   colnames(res)[colnames(res) == "y"] = measure.name
   res = res[, c("min.node.size", "sample.fraction", "mtry", measure.name, "exec.time")]
-  recommendation = colMeans(res[res[, measure.name] < quantile(res[, measure.name], 0.05),])
-  recommendation[c("min.node.size", "mtry")] = round(recommendation[c("min.node.size", "mtry")])
+  recommended.pars = colMeans(res[res[, measure.name] < quantile(res[, measure.name], 0.05),])
+  recommended.pars[c("min.node.size", "mtry")] = round(recommended.pars[c("min.node.size", "mtry")])
   
-  list(recommendation = recommendation, results = res)
+  # save the model with recommended hyperparameters
+  x = as.list(recommended.pars[c("min.node.size", "sample.fraction", "mtry")])
+  x = c(x, num.trees = num.trees, num.threads = num.threads, respect.unordered.factors = TRUE, replace = TRUE)
+  lrn = makeLearner(paste0(type, ".ranger"), par.vals = x, predict.type = predict.type)
+  model = train(lrn, task)
+  
+  out = list(recommended.pars = recommended.pars, model = model, mbo.results = res)
+  class(out) = "tuneRF"
+  return(out)
 }
 
 print.tuneRF = function(x) {
-  cat("Recommended parameter settings:")
-  cat(x$recommendation)
+  cat("Recommended parameter settings:", "\n")
+  ln = length(x$recommended.pars)
+  print(x$recommended.pars[-c(ln-1, ln)])
 }
 
 #' @export

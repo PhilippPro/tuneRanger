@@ -14,7 +14,7 @@ restartTuneRF(save.file.path = "./optpath.RData", task, measure = NULL)
 \item{measure}{Performance measure that was already used in the original \code{\link{tuneRF}} process.}
 }
 \value{
-list with recommendation parameters and data.frame with all evaluated hyperparameters and performance and time results for each run
+list with recommended parameters and data.frame with all evaluated hyperparameters and performance and time results for each run
 }
 \description{
 Restarts the tuning process if an error occured.

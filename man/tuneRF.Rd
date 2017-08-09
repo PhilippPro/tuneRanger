@@ -24,7 +24,7 @@ tuneRF(task, measure = NULL, iters = 100, num.threads = 1,
 directory. If one iteration fails the algorithm can be started again with \code{\link{restartTuneRF}}.}
 }
 \value{
-list with recommendation parameters and data.frame with all evaluated hyperparameters and performance and time results for each run
+list with recommended parameters, a trained model with these paramaters and a data.frame with all evaluated hyperparameters and performance and time results for each run
 }
 \description{
 Automatic tuning of random forests with one line of code.

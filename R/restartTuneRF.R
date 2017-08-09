@@ -5,7 +5,7 @@
 #' @param save.file.path File to which interim results were saved. Default is optpath.RData in the current working 
 #' @param task The mlr task created by \code{\link[mlr]{makeClassifTask}} or \code{\link[mlr]{makeRegrTask}}. 
 #' @param measure Performance measure that was already used in the original \code{\link{tuneRF}} process. 
-#' @return list with recommendation parameters and data.frame with all evaluated hyperparameters and performance and time results for each run
+#' @return list with recommended parameters and data.frame with all evaluated hyperparameters and performance and time results for each run
 #' @export
 #' @examples 
 #' library(tuneRF)
@@ -39,8 +39,8 @@ restartTuneRF = function(save.file.path = "./optpath.RData", task, measure = NUL
   
   colnames(res)[colnames(res) == "y"] = measure.name
   res = res[, c("min.node.size", "sample.fraction", "mtry", measure.name, "exec.time")]
-  recommendation = colMeans(res[res[, measure.name] < quantile(res[, measure.name], 0.05),])
-  recommendation[c("min.node.size", "mtry")] = round(recommendation[c("min.node.size", "mtry")])
+  recommended.pars = colMeans(res[res[, measure.name] < quantile(res[, measure.name], 0.05),])
+  recommended.pars[c("min.node.size", "mtry")] = round(recommended.pars[c("min.node.size", "mtry")])
   
-  list(recommendation = recommendation, results = results)
+  list(recommended.pars = recommended.pars, results = results)
 }
