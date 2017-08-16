@@ -5,7 +5,10 @@ load_all("../tuneRF")
 
 # iris is a bit nonsense here
 estimateTuneRFTime(iris.task)
-res = tuneRF(iris.task, measure = list(multiclass.brier), num.trees = 1000, num.threads = 8, iters = 100)
+res = tuneRF(iris.task, measure = list(multiclass.brier), num.trees = 1000, num.threads = 2, iters = 100)
+
+res = tuneRF(iris.task, measure = list(multiclass.brier), num.trees = 1000, num.threads = 2, iters = 100, 
+  parameters = list(replace = FALSE), tune.parameters = c("mtry", "sample.fraction", "respect.unordered.factors"))
 
 # Best 5 % of the results
 results = res$results

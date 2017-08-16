@@ -34,13 +34,22 @@ restartTuneRF = function(save.file.path = "./optpath.RData", task, measure = NUL
   } else {
     measure.name = "y"
   }
-  res = data.frame(result$opt.path)
-  res$min.node.size = trafo_nodesize_end(res$min.node.size, size)
   
+  res = data.frame(res$opt.path)
+  if("min.node.size" %in% colnames(res))
+    res$min.node.size = trafo_nodesize_end(res$min.node.size, size)
   colnames(res)[colnames(res) == "y"] = measure.name
-  res = res[, c("min.node.size", "sample.fraction", "mtry", measure.name, "exec.time")]
-  recommended.pars = colMeans(res[res[, measure.name] < quantile(res[, measure.name], 0.05),])
-  recommended.pars[c("min.node.size", "mtry")] = round(recommended.pars[c("min.node.size", "mtry")])
+  pos.measure.name = which(colnames(res) == measure.name)
+  pos.exec.time = which(colnames(res) == "exec.time")
+  res = res[, c(1:pos.measure.name, pos.exec.time)]
   
-  list(recommended.pars = recommended.pars, results = results)
+  recommended.pars = lapply(res[res[, measure.name] < quantile(res[, measure.name], 0.05),], summary.function)
+  recommended.pars = data.frame(recommended.pars)
+  recommended.pars[colnames(res) %in% c("min.node.size", "mtry")] = round(recommended.pars[colnames(res) %in% c("min.node.size", "mtry")])
+  
+  unlink(save.file.path)
+  
+  out = list(recommended.pars = recommended.pars, results = res)
+  class(out) = "tuneRF"
+  return(out)
 }

@@ -13,7 +13,8 @@ Depends:
     mlrMBO (>= 1.1.0),
     lubridate (>= 1.6.0), 
     DiceKriging (>= 1.5.5),
-    rgenoud (>= 5.7-12.4)
+    rgenoud (>= 5.7-12.4),
+    parallel (>= 3.3.3)
 LazyData: yes
 ByteCompile: yes
 Date: 2017-06-30

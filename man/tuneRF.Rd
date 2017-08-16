@@ -4,8 +4,10 @@
 \alias{tuneRF}
 \title{tuneRF}
 \usage{
-tuneRF(task, measure = NULL, iters = 100, num.threads = 1,
-  num.trees = 1000, replace = TRUE, save.file.path = "./optpath.RData")
+tuneRF(task, measure = NULL, iters = 100, num.threads = NULL,
+  num.trees = 1000, parameters = list(replace = TRUE,
+  respect.unordered.factors = TRUE), tune.parameters = c("mtry",
+  "min.node.size", "sample.fraction"), save.file.path = "./optpath.RData")
 }
 \arguments{
 \item{task}{The mlr task created by \code{\link[mlr]{makeClassifTask}} or \code{\link[mlr]{makeRegrTask}}.}
@@ -14,20 +16,24 @@ tuneRF(task, measure = NULL, iters = 100, num.threads = 1,
 
 \item{iters}{Number of iterations.}
 
-\item{num.threads}{Number of threads. Default is 1.}
+\item{num.threads}{Number of threads. Default is number of CPUs available.}
 
 \item{num.trees}{Number of trees.}
 
-\item{replace}{Sample with replacement.}
+\item{parameters}{Optional list of fixed named parameters that should be passed to \code{\link[ranger]{ranger}}.}
+
+\item{tune.parameters}{Optional character vector of parameters that should be tuned. 
+Default is mtry, min.node.size and sample.fraction. Additionally replace and respect.unordered.factors can be 
+included in the tuning process.}
 
 \item{save.file.path}{File to which interim results are saved. Default is optpath.RData in the current working 
 directory. If one iteration fails the algorithm can be started again with \code{\link{restartTuneRF}}.}
 }
 \value{
-list with recommended parameters, a trained model with these paramaters and a data.frame with all evaluated hyperparameters and performance and time results for each run
+list with recommended parameters and a data.frame with all evaluated hyperparameters and performance and time results for each run
 }
 \description{
-Automatic tuning of random forests with one line of code.
+Automatic tuning of random forests of the (\code{\link[ranger]{ranger}}) package with one line of code.
 }
 \details{
 Model based optimization is used as tuning strategy and the three parameters min.node.size, sample.fraction and mtry are tuned at once. Out-of-bag predictions are used for evaluation, which makes it much faster than other packages and tuning strategies that use for example 5-fold cross-validation. Classification as well as regression is supported. 
@@ -36,9 +42,8 @@ The measure that should be optimized can be chosen from the list of measures in 
 \examples{
 library(tuneRF)
 library(mlr)
-# iris is a bit nonsense here
-# A mlr task has to be created in order to use the package
 
+# A mlr task has to be created in order to use the package
 # the already existing iris task is used here
 unlink("./optpath.RData")
 estimateTuneRFTime(iris.task)
