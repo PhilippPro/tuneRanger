@@ -44,17 +44,17 @@ tuneRF = function(task, measure = NULL, iters = 100, num.threads = NULL, num.tre
   type = getTaskType(task)
   size = getTaskSize(task)
   NFeats = getTaskNFeats(task)
-  measure.name = measure[[1]]$id
   
   predict.type = ifelse(type == "classif", "prob", "response")
   if(is.null(measure)) {
     if(type == "classif") {
-      measure = list(auc)
+        measure = list(multiclass.brier)
     }
     if(type == "regr") {
       measure = list(mse)
     }
   }
+  measure.name = measure[[1]]$id
   minimize = measure[[1]]$minimize
   
   # Set the number of threads if not given by user
