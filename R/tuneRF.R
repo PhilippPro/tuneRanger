@@ -48,7 +48,12 @@ tuneRF = function(task, measure = NULL, iters = 100, num.threads = NULL, num.tre
   predict.type = ifelse(type == "classif", "prob", "response")
   if(is.null(measure)) {
     if(type == "classif") {
-        measure = list(multiclass.brier)
+      cls.levels = getTaskClassLevels(iris.task)
+      if(length(cls.levels) == 2) {
+        measure = list(auc)
+      } else {
+        measure = list(multiclass.au1p)
+      }
     }
     if(type == "regr") {
       measure = list(mse)
@@ -94,7 +99,6 @@ tuneRF = function(task, measure = NULL, iters = 100, num.threads = NULL, num.tre
   mbo.focussearch.maxit = 3
   mbo.focussearch.restarts = 3
   
-  library(mlrMBO)
   # The final SMOOF objective function
   objFun = makeMultiObjectiveFunction(
     name = "reg",
@@ -114,17 +118,16 @@ tuneRF = function(task, measure = NULL, iters = 100, num.threads = NULL, num.tre
     parego.crit.cb.pi = 0.5
   }
   
-  control = makeMBOControl(n.objectives = 1L, propose.points = mbo.prop.points, impute.y.fun = function(x, y, opt.path) 0.7, 
-    save.on.disk.at = 1:(iters-30), save.file.path = save.file.path)
-  control = setMBOControlTermination(control, max.evals =  f.evals, iters = 300)
+  control = makeMBOControl(n.objectives = 1L, propose.points = mbo.prop.points, # impute.y.fun = function(x, y, opt.path) 0.7, 
+    save.on.disk.at = 1:(iters-30+1), save.file.path = save.file.path)
+  control = setMBOControlTermination(control, max.evals = f.evals, iters = 300)
   control = setMBOControlInfill(control, #opt = infill.opt,
     opt.focussearch.maxit = mbo.focussearch.maxit,
     opt.focussearch.points = mbo.focussearch.points,
     opt.restarts = mbo.focussearch.restarts)
   
-  #mbo.learner = makeLearner("regr.randomForest", predict.type = "se")
-  
   design = generateDesign(mbo.init.design.size, getParamSet(objFun), fun = lhs::maximinLHS)
+  #mbo.learner = makeLearner("regr.randomForest", predict.type = "se")
   
   result = mbo(fun = objFun, design = design, learner = NULL, control = control)
   

@@ -4,7 +4,7 @@
 Philipp Probst
 
 ## Description
-tuneRF is a package for automatic tuning of random forests with one line of code and hence intended for users that are not very familiar with tuning strategies. 
+tuneRF is a package for automatic tuning of random forests with one line of code and intended for users that are not very familiar with tuning strategies. 
 
 Model based optimization is used as tuning strategy and the three parameters min.node.size, sample.fraction and mtry are tuned at once. Out-of-bag predictions are used for evaluation, which makes it much faster than other packages and tuning strategies that use for example 5-fold cross-validation. Classification as well as regression is supported. 
 
@@ -28,14 +28,14 @@ Quickstart:
     # A mlr task has to be created in order to use the package
     # the already existing iris task is used here
     estimateTuneRFTime(iris.task)
-    res = tuneRF(iris.task, measure = list(multiclass.brier), num.trees = 1000, 
+    res = tuneRF(iris.task, measure = list(multiclass.au1p), num.trees = 1000, 
                  num.threads = 8, iters = 100)
     res
 
     # Best 5 % of the results
     results = res$results
-    results[results$multiclass.brier < quantile(results$multiclass.brier, 0.05),]
+    results[results$multiclass.au1p >= quantile(results$multiclass.au1p, 0.95),]
 
 
     # Restart after failing in one of the iterations:
-    res = restartTuneRF("./optpath.RData", iris.task, measure = list(multiclass.brier))
+    res = restartTuneRF("./optpath.RData", iris.task, measure = list(multiclass.au1p))
