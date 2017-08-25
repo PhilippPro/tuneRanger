@@ -50,9 +50,9 @@ tuneRF = function(task, measure = NULL, iters = 100, num.threads = NULL, num.tre
     if(type == "classif") {
       cls.levels = getTaskClassLevels(iris.task)
       if(length(cls.levels) == 2) {
-        measure = list(auc)
+        measure = list(brier)
       } else {
-        measure = list(multiclass.au1p)
+        measure = list(multiclass.brier)
       }
     }
     if(type == "regr") {
