@@ -34,7 +34,7 @@ Quickstart:
 
     # Best 5 % of the results
     results = res$results
-    results[results$multiclass.brier >= quantile(results$multiclass.brier, 0.95),]
+    results[results$multiclass.brier < quantile(results$multiclass.brier, 0.05),]
 
 
     # Restart after failing in one of the iterations:

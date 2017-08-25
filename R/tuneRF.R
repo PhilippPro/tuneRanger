@@ -76,13 +76,13 @@ tuneRF = function(task, measure = NULL, iters = 100, num.threads = NULL, num.tre
   }
   
   # Transformation of nodesize
-  trafo_nodesize = function(x) ceiling(2^(log(size, 2) * x))
+  trafo_nodesize = function(x) ceiling(2^(log(size * 0.2, 2) * x))
   # Its ParamSet
   
   ps = makeParamSet(
     makeIntegerParam("mtry", lower = 1, upper = NFeats),
     makeNumericParam("min.node.size", lower = 0, upper = 1, trafo = trafo_nodesize), 
-    makeNumericParam("sample.fraction", lower = 0.2, upper = 0.9),
+    makeNumericParam("sample.fraction", lower = 0.22, upper = 1),
     makeLogicalParam(id = "replace", default = TRUE),
     makeLogicalParam(id = "respect.unordered.factors", default = FALSE)
   )
@@ -161,7 +161,7 @@ print.tuneRF = function(x) {
 }
 
 #' @export
-trafo_nodesize_end = function(x, size) ceiling(2^(log(size, 2) * x))
+trafo_nodesize_end = function(x, size) ceiling(2^(log(size * 0.2, 2) * x))
 
 #' @export
 summary.function = function(x) ifelse(class(x) %in% c("numeric", "integer"), mean(x), 
