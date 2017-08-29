@@ -26,16 +26,21 @@ Quickstart:
     library(mlr)
 
     # A mlr task has to be created in order to use the package
-    # the already existing iris task is used here
+    # We make an mlr task with the iris dataset here 
+    # (Classification task with makeClassifTask, Regression Task with makeRegrTask)
+    iris.task = makeClassifTask(data = iris, target = "Species")
+    
+    # Rough Estimation of the Tuning time
     estimateTuneRFTime(iris.task)
+
+    # Tuning process (takes around 1 minute); Tuning measure is the multiclass brier score
     res = tuneRF(iris.task, measure = list(multiclass.brier), num.trees = 1000, 
-                 num.threads = 8, iters = 100)
+                 num.threads = 2, iters = 100)
     res
 
     # Best 5 % of the results
     results = res$results
     results[results$multiclass.brier < quantile(results$multiclass.brier, 0.05),]
-
 
     # Restart after failing in one of the iterations:
     res = restartTuneRF("./optpath.RData", iris.task, measure = list(multiclass.brier))

@@ -3,7 +3,10 @@ load_all("../tuneRF")
 # roxygen2::roxygenise("../tuneRF")
 # install("../tuneRF", dependencies = character(0))
 
-# iris is a bit nonsense here
+# make an mlr task with the specific dataset (here iris)
+# Classification task with makeClassifTask, Regression Task with makeRegrTask
+iris.task = makeClassifTask(data = iris, target = "Species")
+
 estimateTuneRFTime(iris.task)
 set.seed(123)
 res = tuneRF(iris.task, measure = list(multiclass.brier), num.trees = 1000, num.threads = 2, iters = 100)
