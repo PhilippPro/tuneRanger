@@ -9,7 +9,7 @@ iris.task = makeClassifTask(data = iris, target = "Species")
 
 estimateTuneRFTime(iris.task)
 set.seed(123)
-res = tuneRF(iris.task, measure = list(multiclass.brier), num.trees = 1000, num.threads = 2, iters = 100)
+res = tuneRF(iris.task, measure = list(multiclass.brier), num.trees = 1000, num.threads = 2, iters = 100, build.final.model = TRUE)
 
 res = tuneRF(iris.task, measure = list(multiclass.brier), num.trees = 1000, num.threads = 2, iters = 100, 
   parameters = list(replace = FALSE), tune.parameters = c("mtry", "sample.fraction", "respect.unordered.factors"))

@@ -13,6 +13,9 @@
 #' included in the tuning process.
 #' @param save.file.path File to which interim results are saved. Default is optpath.RData in the current working 
 #' directory. If one iteration fails the algorithm can be started again with \code{\link{restartTuneRF}}.
+#' @param build.final.model [\code{logical(1)}]\cr
+#'   Should the best found model be fitted on the complete dataset?
+#'   Default is \code{FALSE}.
 #' @return list with recommended parameters and a data.frame with all evaluated hyperparameters and performance and time results for each run
 #' @details Model based optimization is used as tuning strategy and the three parameters min.node.size, sample.fraction and mtry are tuned at once. Out-of-bag predictions are used for evaluation, which makes it much faster than other packages and tuning strategies that use for example 5-fold cross-validation. Classification as well as regression is supported. 
 #' The measure that should be optimized can be chosen from the list of measures in mlr: http://mlr-org.github.io/mlr-tutorial/devel/html/measures/index.html
@@ -33,7 +36,8 @@
 #' res[res$multiclass.brier < quantile(res$multiclass.brier, 0.05),]
 tuneRF = function(task, measure = NULL, iters = 100, num.threads = NULL, num.trees = 1000, 
   parameters = list(replace = TRUE, respect.unordered.factors = TRUE), 
-  tune.parameters = c("mtry", "min.node.size", "sample.fraction"), save.file.path = "./optpath.RData") {
+  tune.parameters = c("mtry", "min.node.size", "sample.fraction"), save.file.path = "./optpath.RData",
+  build.final.model = FALSE) {
   
   unlink(save.file.path)
   
@@ -141,15 +145,20 @@ tuneRF = function(task, measure = NULL, iters = 100, num.threads = NULL, num.tre
   recommended.pars = data.frame(recommended.pars)
   recommended.pars[colnames(res) %in% c("min.node.size", "mtry")] = round(recommended.pars[colnames(res) %in% c("min.node.size", "mtry")])
   
-  # # save the model with recommended hyperparameters
-  # x = as.list(recommended.pars[c("min.node.size", "sample.fraction", "mtry")])
-  # x = c(x, num.trees = num.trees, num.threads = num.threads, respect.unordered.factors = TRUE, replace = TRUE)
-  # lrn = makeLearner(paste0(type, ".ranger"), par.vals = x, predict.type = predict.type)
-  # model = train(lrn, task)
+  # save the model with recommended hyperparameters
+  mod = if(build.final.model) {
+    ln.rec.pars = length(recommended.pars)
+    x = as.list(recommended.pars[-c(ln.rec.pars - 1, ln.rec.pars)])
+    x = c(x, num.trees = num.trees, num.threads = num.threads, parameters)
+    lrn = makeLearner(paste0(type, ".ranger"), par.vals = x, predict.type = predict.type)
+    train(lrn, task)
+  } else {
+    NULL
+  }
   
   unlink(save.file.path)
   
-  out = list(recommended.pars = recommended.pars, results = res)
+  out = list(recommended.pars = recommended.pars, results = res, model = mod)
   class(out) = "tuneRF"
   return(out)
 }
