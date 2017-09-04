@@ -33,29 +33,20 @@ predictLearner.classif.tuneRF = function(.learner, .model, .newdata, ...) {
   return(p$predictions)
 }
 
-predictLearner.classif.autoxgboost = function(.learner, .model, .newdata, ...) {
-  model = .model$learner.model$final.model
-  learner = model$learner
-  learner = setPredictType(learner, .learner$predict.type)
-  predictLearner(learner, model, .newdata, ...)
-}
-
-
-
-#' @export
-getOOBPredsLearner.classif.ranger = function(.learner, .model) {
-  .model$learner.model$predictions
-}
-
-#' @export
-getFeatureImportanceLearner.classif.ranger = function(.learner, .model, ...) {
-  has.fiv = .learner$par.vals$importance
-  if (is.null(has.fiv) || has.fiv == "none") {
-    stop("You must set the learners parameter value for importance to
-      'impurity' or 'permutation' to compute feature importance")
-  }
-  mod = getLearnerModel(.model)
-  ranger::importance(mod)
-}
+#' #' @export
+#' getOOBPredsLearner.classif.ranger = function(.learner, .model) {
+#'   .model$learner.model$predictions
+#' }
+#' 
+#' #' @export
+#' getFeatureImportanceLearner.classif.ranger = function(.learner, .model, ...) {
+#'   has.fiv = .learner$par.vals$importance
+#'   if (is.null(has.fiv) || has.fiv == "none") {
+#'     stop("You must set the learners parameter value for importance to
+#'       'impurity' or 'permutation' to compute feature importance")
+#'   }
+#'   mod = getLearnerModel(.model)
+#'   ranger::importance(mod)
+#' }
 
   
