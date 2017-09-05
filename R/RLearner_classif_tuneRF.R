@@ -10,7 +10,6 @@ makeRLearner.classif.tuneRF = function() {
       makeIntegerLearnerParam(id = "num.threads", lower = 1L, when = "both", tunable = FALSE),
       makeIntegerLearnerParam(id = "num.trees", lower = 1L, default = 500L)
     ),
-    par.vals = list(num.threads = 1L, verbose = FALSE, respect.unordered.factors = TRUE),
     properties = c("twoclass", "multiclass", "prob", "numerics", "factors", "ordered", "featimp", "weights", "oobpreds"),
     name = "Random Forests",
     short.name = "tuneRF",
@@ -30,7 +29,12 @@ trainLearner.classif.tuneRF = function(.learner, .task, .subset, .weights = NULL
 predictLearner.classif.tuneRF = function(.learner, .model, .newdata, ...) {
   model = .model$learner.model$learner.model
   p = predict(object = model, data = .newdata, ...)
-  return(p$predictions)
+  if (.learner$predict.type == "response") {
+    classes = factor(colnames(p$predictions)[apply(p$predictions, 1, which.max)], levels = colnames(p$predictions))
+    return(classes)
+  } else {
+    return(p$predictions)
+  }
 }
 
 #' #' @export
