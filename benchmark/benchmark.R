@@ -5,6 +5,7 @@ load_all("../tuneRF")
 library(mlr)
 
 source("./benchmark/RLearner_classif_caretRanger.R")
+library(mlrHyperopt)
 source("./benchmark/RLearner_classif_hyperoptRanger.R")
 
 lrns = list(makeLearner("classif.tuneRF", id = "tuneRFBrier", predict.type = "prob", par.vals = list(num.trees = 2000, measure = list(multiclass.brier))), 
@@ -14,7 +15,9 @@ lrns = list(makeLearner("classif.tuneRF", id = "tuneRFBrier", predict.type = "pr
   makeLearner("classif.ranger", id = "ranger", par.vals = list(num.trees = 2000, respect.unordered.factors = TRUE), predict.type = "prob")
 )
 
-bmr1 = benchmark(lrns[[3]], iris.task)
+rdesc = makeResampleDesc("CV", iters = 2)
+measures = list(mmce, multiclass.au1p, multiclass.brier, logloss, timetrain)
+bmr1 = benchmark(lrns, iris.task, rdesc, measures)
 
 library(OpenML)
 tasks = listOMLTasks(number.of.classes = 2L, number.of.missing.values = 0, 
