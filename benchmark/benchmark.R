@@ -1,25 +1,20 @@
-library(caret)
-train(iris[, 1:4], iris[, 5], method = "ranger")
-
-library(mlrHyperopt)
-hyperopt(iris.task, learner = "classif.ranger")
-
-library(tuneRF)
-tuneRF(iris.task)
+library(devtools)
+load_all("../tuneRF")
 
 # Compare runtime and AUC/Brier Score with mlr
-
 library(mlr)
 
-lrns = list(makeLearner("classif.tuneRF", predict.type = "prob", 
-  par.vals = list(num.trees = 2000, measure = list(multiclass.brier))), 
-  makeLearner("classif.ranger", par.vals = list(num.trees = 2000, respect.unordered.factors = TRUE))
+source("./benchmark/RLearner_classif_caretRanger.R")
+source("./benchmark/RLearner_classif_hyperoptRanger.R")
+
+lrns = list(makeLearner("classif.tuneRF", id = "tuneRFBrier", predict.type = "prob", par.vals = list(num.trees = 2000, measure = list(multiclass.brier))), 
+  makeLearner("classif.tuneRF", id = "tuneRFAUC", predict.type = "prob", par.vals = list(num.trees = 2000, measure = list(multiclass.au1p))), 
+  makeLearner("classif.hyperoptRanger", id = "hyperopt", predict.type = "prob"), 
+  makeLearner("classif.caretRanger", id = "caret", predict.type = "prob"), 
+  makeLearner("classif.ranger", id = "ranger", par.vals = list(num.trees = 2000, respect.unordered.factors = TRUE), predict.type = "prob")
 )
-lrn = makeLearner("classif.tuneRF", predict.type = "prob")
-lrn = makeLearner("classif.ranger", predict.type = "prob", par.vals = list(num.trees = 200))
-# At the moment only probability prediction possible!!
-mod = train(lrn, iris.task)
-pred = predict(mod, task = iris.task)
+
+bmr1 = benchmark(lrns[[3]], iris.task)
 
 library(OpenML)
 tasks = listOMLTasks(number.of.classes = 2L, number.of.missing.values = 0, 
@@ -41,7 +36,9 @@ for(i in seq_along(task.ids)) {
 save(time.estimate, file = "./benchmark/time.estimate.RData")
 # benchmark
 bmr = list()
+configureMlr(on.learner.error = "warn")
 for(i in seq_along(task.ids)) {
+  set.seed(145 + i)
   if(time.estimate[[i]] < 300){
     task = getOMLTask(task.ids[i])
     task = convertOMLTaskToMlr(task)$mlr.task

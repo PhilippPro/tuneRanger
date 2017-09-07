@@ -22,7 +22,6 @@ makeRLearner.classif.tuneRF = function() {
 # parameters = list(replace = TRUE, respect.unordered.factors = TRUE
 
 trainLearner.classif.tuneRF = function(.learner, .task, .subset, .weights = NULL, ...) {
-  tn = getTaskTargetNames(.task)
   tuneRF::tuneRF(task = subsetTask(.task, .subset), build.final.model = TRUE, ...)$model
 }
 
