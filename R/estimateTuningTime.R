@@ -23,7 +23,7 @@ estimateTuneRFTime = function(task, iters = 100, num.threads = 1, num.trees = 10
   predict.type = ifelse(type == "classif", "prob", "response")
   par.vals = list(num.trees = num.trees, num.threads = num.threads, respect.unordered.factors = TRUE, replace = TRUE, mtry = mtry)
   lrn = makeLearner(paste0(type, ".ranger"), par.vals = par.vals, predict.type = predict.type)
-  time = system.time(train(lrn, task))[3]
+  time = system.time(mlr::train(lrn, task))[3]
   cat(paste("Approximated time for tuning:", my_seconds_to_period(time * iters + 100)))
   invisible(time*iters + 100)
 }

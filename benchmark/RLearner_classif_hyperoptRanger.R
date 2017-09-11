@@ -12,7 +12,7 @@ makeRLearner.classif.hyperoptRanger = function() {
   )
 }
 
-# make Own parameter configuration
+# make own parameter configuration with 2000 trees
 par.set = makeParamSet(
   makeIntegerParam(
     id = "mtry",
@@ -22,19 +22,19 @@ par.set = makeParamSet(
   makeIntegerParam(
     id = "min.node.size",
     lower = 1,
-    upper = expression(round(n/10)),
+    upper = 10,
     default = 1),
-  keys = c("p", "n"))
+  keys = c("p"))
 par.config = makeParConfig(
   par.set = par.set,
-  par.vals = list(num.trees = 2000),
+  par.vals = list(num.trees = 2000, num.threads = 10),
   learner.name = "ranger"
 )
 
 trainLearner.classif.hyperoptRanger = function(.learner, .task, .subset, .weights = NULL, ...) {
   res = hyperopt(.task, learner = "classif.ranger", par.config = par.config)
   lrn = setPredictType(res$learner, .learner$predict.type)
-  train(lrn, .task, subset = .subset, weights = .weights)
+  mlr::train(lrn, .task, subset = .subset, weights = .weights)
 }
 
 predictLearner.classif.hyperoptRanger = function(.learner, .model, .newdata, ...) {

@@ -15,7 +15,7 @@ makeRLearner.classif.caretRanger = function() {
 trainLearner.classif.caretRanger = function(.learner, .task, .subset, .weights = NULL, ...) {
   target = getTaskTargets(iris.task)
   data = getTaskData(.task, subset = .subset, target.extra = TRUE)
-  caret::train(data$data, data$target, method = "ranger", weights = .weights, num.trees = 2000, trControl = trainControl(classProbs = (.learner$predict.type == "prob")))
+  caret::train(data$data, data$target, method = "ranger", weights = .weights, num.trees = 2000, trControl = caret::trainControl(classProbs = (.learner$predict.type == "prob")))
 }
 
 predictLearner.classif.caretRanger = function(.learner, .model, .newdata, ...) {

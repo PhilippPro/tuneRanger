@@ -74,7 +74,7 @@ tuneRF = function(task, measure = NULL, iters = 100, num.threads = NULL, num.tre
   performan = function(x) {
     par.vals = c(x, num.trees = num.trees, num.threads = num.threads, parameters)
     lrn = makeLearner(paste0(type, ".ranger"), par.vals = par.vals, predict.type = predict.type)
-    mod = train(lrn, task)
+    mod = mlr::train(lrn, task)
     preds = getOOBPreds(mod, task)
     performance(preds, measures = measure)
   }
@@ -151,7 +151,7 @@ tuneRF = function(task, measure = NULL, iters = 100, num.threads = NULL, num.tre
     x = as.list(recommended.pars[-c(ln.rec.pars - 1, ln.rec.pars)])
     x = c(x, num.trees = num.trees, num.threads = num.threads, parameters)
     lrn = makeLearner(paste0(type, ".ranger"), par.vals = x, predict.type = predict.type)
-    train(lrn, task)
+    mlr::train(lrn, task)
   } else {
     NULL
   }
