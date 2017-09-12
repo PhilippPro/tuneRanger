@@ -43,6 +43,7 @@ for(i in seq_along(task.ids)) {
   save(time.estimate, file = "./benchmark/time.estimate.RData")
 }
 
+load("./benchmark/time.estimate.RData")
 rdesc = makeResampleDesc("RepCV", reps = 5, folds = 5)
 measures = list(mmce, multiclass.au1p, multiclass.brier, logloss, timetrain)
 # benchmark
@@ -67,10 +68,14 @@ for(i in seq_along(task.ids.bmr)) {
   set.seed(145 + i)
   task = getOMLTask(task.ids.bmr[i])
   task = convertOMLTaskToMlr(task)$mlr.task
+  
+  a = mlr::train(lrns[[5]], task)
+  predict(a, task)
+
   bmr[[i]] = benchmark(lrns, task, rdesc, measures, keep.pred = FALSE, models = FALSE)
   save(bmr, file = "./benchmark/bmr.RData")
 }
-
+load("./benchmark/bmr.RData")
 # Which datasets are not super easy (AUC < 0.99)and discriminate between the algorithms?
 
 
