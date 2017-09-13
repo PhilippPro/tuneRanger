@@ -21,10 +21,10 @@ trainLearner.classif.caretRanger = function(.learner, .task, .subset, .weights =
 predictLearner.classif.caretRanger = function(.learner, .model, .newdata, ...) {
   model = .model$learner.model
   type = ifelse(.learner$predict.type == "prob", "prob", "raw")
-  p = predict(object = model, data = .newdata, type = type, ...)
+  p = predict(object = model, newdata = .newdata, type = type, ...)
   if (type == "prob") {
     colnames(p) = substr(colnames(p), 2, 1000)
-    p = as.matrix(p) 
+    p = as.matrix(p)
   } else {
     levels(p) = substr(levels(p), 2, 1000) 
   }
