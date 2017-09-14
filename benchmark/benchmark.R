@@ -85,10 +85,10 @@ for(i in c(1:16)[-c(1,3,12)]) {
   res_aggr = res_aggr + res_i
   res_aggr_rank = res_aggr_rank + apply(res_i[, -5], 1, rank)
 }
-res_aggr = res_aggr/13
+res_aggr = res_aggr/14
 res_aggr
 
 # average rank matrix
-res_aggr_rank = res_aggr_rank/13
+res_aggr_rank = res_aggr_rank/14
 res_aggr_rank
 
