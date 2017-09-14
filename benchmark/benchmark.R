@@ -44,7 +44,7 @@ for(i in seq_along(task.ids)) {
 }
 
 load("./benchmark/time.estimate.RData")
-rdesc = makeResampleDesc("RepCV", reps = 5, folds = 5)
+rdesc = makeResampleDesc("RepCV", reps = 10, folds = 5)
 measures = list(mmce, multiclass.au1p, multiclass.brier, logloss, timetrain)
 # benchmark
 bmr = list()
@@ -72,8 +72,23 @@ for(i in seq_along(task.ids.bmr)) {
   save(bmr, file = "./benchmark/bmr.RData")
 }
 load("./benchmark/bmr.RData")
-# Which datasets are not super easy (AUC < 0.99)and discriminate between the algorithms?
+# Which datasets are not super easy (AUC < 0.99) and discriminate between the algorithms?
 
 
 # 80 h auf einem Core -> 8 h
 bmr
+
+res_aggr = data.frame(getBMRAggrPerformances(bmr[[1]]))
+res_aggr_rank = apply(res_aggr[,-5], 1, rank)
+for(i in c(1:16)[-c(1,3,12)]) {
+  res_i = data.frame(getBMRAggrPerformances(bmr[[i]]))
+  res_aggr = res_aggr + res_i
+  res_aggr_rank = res_aggr_rank + apply(res_i[, -5], 1, rank)
+}
+res_aggr = res_aggr/13
+res_aggr
+
+# average rank matrix
+res_aggr_rank = res_aggr_rank/13
+res_aggr_rank
+
