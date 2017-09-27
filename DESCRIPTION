@@ -3,7 +3,9 @@ Type: Package
 Title: tune random forest
 Description: More about what it does (maybe more than one line)
 Version: 0.1
-Authors@R: person("Philipp", "Probst", email = "philipp_probst@gmx.de", role = c("aut", "cre"))
+Authors@R: c(
+    person("Philipp", "Probst", email = "philipp_probst@gmx.de", role = c("aut", "cre")),
+    person("Simon", "Klau", email = "simonklau@ibe.med.uni-muenchen.de", role = "ctb"))
 License: GPL-3
 Encoding: UTF-8
 Depends:
