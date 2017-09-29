@@ -7,7 +7,8 @@
 tuneRF(task, measure = NULL, iters = 100, num.threads = NULL,
   num.trees = 1000, parameters = list(replace = TRUE,
   respect.unordered.factors = TRUE), tune.parameters = c("mtry",
-  "min.node.size", "sample.fraction"), save.file.path = "./optpath.RData")
+  "min.node.size", "sample.fraction"), save.file.path = "./optpath.RData",
+  build.final.model = FALSE)
 }
 \arguments{
 \item{task}{The mlr task created by \code{\link[mlr]{makeClassifTask}} or \code{\link[mlr]{makeRegrTask}}.}
@@ -28,6 +29,10 @@ included in the tuning process.}
 
 \item{save.file.path}{File to which interim results are saved. Default is optpath.RData in the current working 
 directory. If one iteration fails the algorithm can be started again with \code{\link{restartTuneRF}}.}
+
+\item{build.final.model}{[\code{logical(1)}]\cr
+Should the best found model be fitted on the complete dataset?
+Default is \code{FALSE}.}
 }
 \value{
 list with recommended parameters and a data.frame with all evaluated hyperparameters and performance and time results for each run
@@ -49,7 +54,7 @@ unlink("./optpath.RData")
 estimateTuneRFTime(iris.task)
 
 res = tuneRF(iris.task, measure = list(multiclass.brier), num.trees = 1000, 
-  num.threads = 8, iters = 100)
+  num.threads = 2, iters = 100)
   
 # Best 5 \% of the results
 res[res$multiclass.brier < quantile(res$multiclass.brier, 0.05),]
