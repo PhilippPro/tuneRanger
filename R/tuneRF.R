@@ -30,7 +30,7 @@
 #' estimateTuneRFTime(iris.task)
 #' 
 #' res = tuneRF(iris.task, measure = list(multiclass.brier), num.trees = 1000, 
-#'   num.threads = 8, iters = 100)
+#'   num.threads = 2, iters = 100)
 #'   
 #' # Best 5 % of the results
 #' res[res$multiclass.brier < quantile(res$multiclass.brier, 0.05),]
@@ -82,7 +82,6 @@ tuneRF = function(task, measure = NULL, iters = 100, num.threads = NULL, num.tre
   # Transformation of nodesize
   trafo_nodesize = function(x) ceiling(2^(log(size * 0.2, 2) * x))
   # Its ParamSet
-  
   ps = makeParamSet(
     makeIntegerParam("mtry", lower = 1, upper = NFeats),
     makeNumericParam("min.node.size", lower = 0, upper = 1, trafo = trafo_nodesize), 
@@ -141,7 +140,11 @@ tuneRF = function(task, measure = NULL, iters = 100, num.threads = NULL, num.tre
   colnames(res)[colnames(res) == "y"] = measure.name
   res = res[, c(tune.parameters, measure.name, "exec.time")]
   
-  recommended.pars = lapply(res[res[, measure.name] < quantile(res[, measure.name], 0.05),], summary.function)
+  if (minimize) {
+    recommended.pars = lapply(res[res[, measure.name] < quantile(res[, measure.name], 0.05),], summary.function)
+  } else {
+    recommended.pars = lapply(res[res[, measure.name] > quantile(res[, measure.name], 0.95),], summary.function)
+  }
   recommended.pars = data.frame(recommended.pars)
   recommended.pars[colnames(res) %in% c("min.node.size", "mtry")] = round(recommended.pars[colnames(res) %in% c("min.node.size", "mtry")])
   

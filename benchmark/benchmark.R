@@ -58,7 +58,6 @@ cbind(time.estimate, (unlist(time.estimate)-100)<60)
 namen = numeric(30)
 for(i in seq_along(task.ids.bmr)) {
   print(i)
-  set.seed(145 + i)
   task = getOMLTask(task.ids.bmr[i])
   namen[i] = task$input$data.set$desc$name
 }
@@ -85,7 +84,6 @@ unlist(time.estimate)[which((unlist(time.estimate)-100)>60 & (unlist(time.estima
 namen = numeric(length(task.ids.bmr2))
 for(i in seq_along(task.ids.bmr2)) {
   print(i)
-  set.seed(145 + i)
   task = getOMLTask(task.ids.bmr2[i])
   namen[i] = task$input$data.set$desc$name
 }
@@ -101,7 +99,6 @@ for(i in seq_along(task.ids.bmr2)) {
   save(bmr, file = "./benchmark/bmr.RData")
 }
 load("./benchmark/bmr.RData")
-
 
 # Analysis
 # Wilcoxon paired test
@@ -138,17 +135,17 @@ res_aggr = data.frame(getBMRAggrPerformances(bmr[[1]]))
 res_aggr_rank = apply(res_aggr[,-5], 1, rank)
 diff = list()
 diff[[1]] = diff(getBMRAggrPerformances(bmr[[1]], as.df = T)[c(2,5), 4])
-for(i in c(1:26)[-c(1,3,12,17,22)]) {
+for(i in c(1:27)[-c(1,3,12,17,22)]) {
   diff[[i]] =  diff(getBMRAggrPerformances(bmr[[i]], as.df = T)[c(2,5), 4])
   res_i = data.frame(getBMRAggrPerformances(bmr[[i]]))
   res_aggr = res_aggr + res_i
   res_aggr_rank = res_aggr_rank + apply(res_i[, -5], 1, rank)
 }
-res_aggr = res_aggr/22
+res_aggr = res_aggr/23
 res_aggr
 
 # average rank matrix
-res_aggr_rank = res_aggr_rank/22
+res_aggr_rank = res_aggr_rank/23
 res_aggr_rank
 
 
@@ -159,7 +156,6 @@ task.ids.bmr3 = task.ids[which((unlist(time.estimate))>600 & (unlist(time.estima
 namen = numeric(length(task.ids.bmr3))
 for(i in seq_along(task.ids.bmr3)) {
   print(i)
-  set.seed(145 + i)
   task = getOMLTask(task.ids.bmr3[i])
   namen[i] = task$input$data.set$desc$name
 }
@@ -169,7 +165,7 @@ task.ids.bmr3 = task.ids.bmr3[-c(8, 10:13)]
 rdesc = makeResampleDesc("RepCV", reps = 2, folds = 5)
 for(i in seq_along(task.ids.bmr3)) {
   print(i)
-  set.seed(145 + i)
+  set.seed(245 + i)
   task = getOMLTask(task.ids.bmr3[i])
   task = convertOMLTaskToMlr(task)$mlr.task
   bmr[[length(bmr) + 1]] = benchmark(lrns, task, rdesc, measures, keep.pred = FALSE, models = FALSE)
@@ -184,7 +180,7 @@ unlist(time.estimate)[which((unlist(time.estimate))>3600)]
 namen = numeric(length(task.ids.bmr4))
 for(i in seq_along(task.ids.bmr4)) {
   print(i)
-  set.seed(145 + i)
+  set.seed(345 + i)
   task = getOMLTask(task.ids.bmr4[i])
   namen[i] = task$input$data.set$desc$name
 }
