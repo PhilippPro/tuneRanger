@@ -131,8 +131,9 @@ tuneRF = function(task, measure = NULL, iters = 100, num.threads = NULL, num.tre
   
   design = generateDesign(mbo.init.design.size, getParamSet(objFun), fun = lhs::maximinLHS)
   #mbo.learner = makeLearner("regr.randomForest", predict.type = "se")
+  mbo.learner = makeLearner("regr.km", covtype = "matern3_2", optim.method = "BFGS", nugget.estim = TRUE, jitter = TRUE)
   
-  result = mbo(fun = objFun, design = design, learner = NULL, control = control)
+  result = mbo(fun = objFun, design = design, learner = mbo.learner, control = control)
   
   res = data.frame(result$opt.path)
   if("min.node.size" %in% tune.parameters)
@@ -141,9 +142,9 @@ tuneRF = function(task, measure = NULL, iters = 100, num.threads = NULL, num.tre
   res = res[, c(tune.parameters, measure.name, "exec.time")]
   
   if (minimize) {
-    recommended.pars = lapply(res[res[, measure.name] < quantile(res[, measure.name], 0.05),], summary.function)
+    recommended.pars = lapply(res[res[, measure.name] <= quantile(res[, measure.name], 0.05),], summary.function)
   } else {
-    recommended.pars = lapply(res[res[, measure.name] > quantile(res[, measure.name], 0.95),], summary.function)
+    recommended.pars = lapply(res[res[, measure.name] >= quantile(res[, measure.name], 0.95),], summary.function)
   }
   recommended.pars = data.frame(recommended.pars)
   recommended.pars[colnames(res) %in% c("min.node.size", "mtry")] = round(recommended.pars[colnames(res) %in% c("min.node.size", "mtry")])

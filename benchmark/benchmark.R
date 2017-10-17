@@ -9,8 +9,10 @@ library(mlrHyperopt)
 source("./benchmark/RLearner_classif_hyperoptRanger.R")
 
 lrns = list(
+  makeLearner("classif.tuneRF", id = "tuneRFMMCE", predict.type = "prob", 
+    par.vals = list(num.trees = 2000, num.threads = 10, measure = list(mmce))),
   makeLearner("classif.tuneRF", id = "tuneRFAUC", predict.type = "prob", 
-    par.vals = list(num.trees = 2000, num.threads = 10, measure = list(multiclass.au1p))), 
+    par.vals = list(num.trees = 2000, num.threads = 10, measure = list(multiclass.au1p))),
   makeLearner("classif.tuneRF", id = "tuneRFBrier", predict.type = "prob", 
     par.vals = list(num.trees = 2000, num.threads = 10, measure = list(multiclass.brier))), 
   makeLearner("classif.tuneRF", id = "tuneRFLogloss", predict.type = "prob", 
@@ -45,7 +47,6 @@ measures = list(mmce, multiclass.au1p, multiclass.brier, logloss, timetrain)
 # benchmark
 bmr = list()
 configureMlr(on.learner.error = "warn")
-
 
 # Choose 5 (10) small, 5 medium and 5 big datasets
 # select datasets where RF do not take longer than ...
@@ -135,7 +136,7 @@ res_aggr = data.frame(getBMRAggrPerformances(bmr[[1]]))
 res_aggr_rank = apply(res_aggr[,-5], 1, rank)
 diff = list()
 diff[[1]] = diff(getBMRAggrPerformances(bmr[[1]], as.df = T)[c(2,5), 4])
-for(i in c(1:27)[-c(1,3,12,17,22)]) {
+for(i in c(1:30)[-c(1,3,12,17,22)]) {
   diff[[i]] =  diff(getBMRAggrPerformances(bmr[[i]], as.df = T)[c(2,5), 4])
   res_i = data.frame(getBMRAggrPerformances(bmr[[i]]))
   res_aggr = res_aggr + res_i
