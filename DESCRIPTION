@@ -1,6 +1,6 @@
 Package: tuneRF
 Type: Package
-Title: tune random forest
+Title: Tune random forests
 Description: More about what it does (maybe more than one line)
 Version: 0.1
 Authors@R: c(

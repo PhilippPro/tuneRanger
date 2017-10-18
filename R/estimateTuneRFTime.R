@@ -8,13 +8,6 @@
 #' @return estimated time for the tuning procedure
 #' @export
 #' @examples
-#' library(devtools)
-#' load_all("../tuneRF")
-#' roxygen2::roxygenise("../tuneRF")
-# install("tuneRF")
-#' 
-#' # iris is a bit nonsense here
-#' unlink("./optpath.RData")
 #' estimateTuneRFTime(iris.task)
 estimateTuneRFTime = function(task, iters = 100, num.threads = 1, num.trees = 1000, respect.unordered.factors = TRUE) {
   type = getTaskType(task)
@@ -26,23 +19,6 @@ estimateTuneRFTime = function(task, iters = 100, num.threads = 1, num.trees = 10
   time = system.time(mlr::train(lrn, task))[3]
   cat(paste("Approximated time for tuning:", my_seconds_to_period(time * iters + 100)))
   invisible(time*iters + 100)
-}
-
-#' estimateTuneRangerTime
-#'
-#' @param formula 
-#' @param data 
-#' @param iters 
-#' @param num.threads 
-#' @param num.trees 
-#' @param respect.unordered.factors 
-#'
-#' @return estimated time for the tuning procedure
-#' @export
-estimateTuneRangerTime = function(formula, data, iters = 100, num.threads = 1, num.trees = 1000, respect.unordered.factors = TRUE) {
-  time = system.time(ranger(formula, data, num.threads = num.threads, 
-    num.trees = num.trees, respect.unordered.factors = respect.unordered.factors))[3]
-  cat(paste("Approximated time for tuning:", my_seconds_to_period(time * iters + 100)))
 }
 
 my_seconds_to_period = function(x) {

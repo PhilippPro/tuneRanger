@@ -131,7 +131,8 @@ tuneRF = function(task, measure = NULL, iters = 100, num.threads = NULL, num.tre
   
   design = generateDesign(mbo.init.design.size, getParamSet(objFun), fun = lhs::maximinLHS)
   #mbo.learner = makeLearner("regr.randomForest", predict.type = "se")
-  mbo.learner = makeLearner("regr.km", covtype = "matern3_2", optim.method = "BFGS", nugget.estim = TRUE, jitter = TRUE)
+  mbo.learner = makeLearner("regr.km", covtype = "matern3_2", optim.method = "BFGS", nugget.estim = TRUE, 
+    jitter = TRUE, predict.type = "se", config = list(show.learner.output = FALSE))
   
   result = mbo(fun = objFun, design = design, learner = mbo.learner, control = control)
   
