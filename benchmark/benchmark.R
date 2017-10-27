@@ -107,7 +107,7 @@ data = array(NA, dim = c(length(bmr), 2, 5))
 for(i in 1:length(bmr)) {
   print(i)
   res_aggr = data.frame(getBMRAggrPerformances(bmr[[i]]))
-  data[i,,] = t(data.frame(res_aggr[,c(2,6) ]))
+  data[i,,] = t(data.frame(res_aggr[,c(3,7) ]))
 }
 
 # mmce
@@ -133,20 +133,20 @@ mean(data[,2,1], na.rm = T)
 bmr[[12]]$results$`steel-plates-fault`$tuneRFBrier$measures.test
 
 res_aggr = data.frame(getBMRAggrPerformances(bmr[[1]]))
-res_aggr_rank = apply(res_aggr[,-5], 1, rank)
+res_aggr_rank = apply(res_aggr[,], 1, rank)
 diff = list()
 diff[[1]] = diff(getBMRAggrPerformances(bmr[[1]], as.df = T)[c(2,5), 4])
-for(i in c(1:30)[-c(1,3,12,17,22)]) {
+for(i in 2:length(bmr)) {
   diff[[i]] =  diff(getBMRAggrPerformances(bmr[[i]], as.df = T)[c(2,5), 4])
   res_i = data.frame(getBMRAggrPerformances(bmr[[i]]))
   res_aggr = res_aggr + res_i
-  res_aggr_rank = res_aggr_rank + apply(res_i[, -5], 1, rank)
+  res_aggr_rank = res_aggr_rank + apply(res_i[, ], 1, rank)
 }
-res_aggr = res_aggr/23
+res_aggr = res_aggr/length(bmr)
 res_aggr
 
 # average rank matrix
-res_aggr_rank = res_aggr_rank/23
+res_aggr_rank = res_aggr_rank/length(bmr)
 res_aggr_rank
 
 
