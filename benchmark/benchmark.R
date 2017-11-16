@@ -102,7 +102,22 @@ for(i in seq_along(task.ids.bmr2)) {
 load("./benchmark/bmr.RData")
 
 # Analysis
+
+# Data cleaning
+# caret problems
+a = bmr[[30]]
+a$results$Australian$caret$measures.test
+# no results at all
+# mmce
+a = bmr[[20]]
+resis = a$results$`kr-vs-kp`$tuneRFMMCE$measures.test
+resis = resis[!is.na(resis$mmce),]
+names = names(bmr[[20]]$results$`kr-vs-kp`$tuneRFMMCE$aggr)
+bmr[[20]]$results$`kr-vs-kp`$tuneRFMMCE$aggr = colMeans(resis)[2:6]
+names(bmr[[20]]$results$`kr-vs-kp`$tuneRFMMCE$aggr) = names
+
 # Wilcoxon paired test
+library(mlr)
 data = array(NA, dim = c(length(bmr), 2, 5))
 for(i in 1:length(bmr)) {
   print(i)
@@ -129,28 +144,61 @@ mean(data[,1,1], na.rm = T)
 mean(data[,2,1], na.rm = T)
 
 # Descriptive Analysis
+resi = list()
+resi[[1]] = data.frame(getBMRAggrPerformances(bmr[[1]]))
+res_aggr = resi[[1]]
+res_aggr_rank = apply(resi[[1]], 1, rank)
 
-bmr[[12]]$results$`steel-plates-fault`$tuneRFBrier$measures.test
-
-res_aggr = data.frame(getBMRAggrPerformances(bmr[[1]]))
-res_aggr_rank = apply(res_aggr[,], 1, rank)
-diff = list()
-diff[[1]] = diff(getBMRAggrPerformances(bmr[[1]], as.df = T)[c(2,5), 4])
 for(i in 2:length(bmr)) {
-  diff[[i]] =  diff(getBMRAggrPerformances(bmr[[i]], as.df = T)[c(2,5), 4])
-  res_i = data.frame(getBMRAggrPerformances(bmr[[i]]))
-  res_aggr = res_aggr + res_i
-  res_aggr_rank = res_aggr_rank + apply(res_i[, ], 1, rank)
+  resi[[i]] = data.frame(getBMRAggrPerformances(bmr[[i]]))
+  # caret gets the worst result, if NA
+  if(is.na(resi[[i]][1,6])) {
+    resi[[i]][1,6] = max(resi[[i]][1,], na.rm = T)
+    resi[[i]][2,6] = min(resi[[i]][2,], na.rm = T)
+    resi[[i]][3,6] = max(resi[[i]][3,], na.rm = T)
+    resi[[i]][4,6] = max(resi[[i]][4,], na.rm = T)
+  }
+  res_aggr = res_aggr + resi[[i]]
+  res_aggr_rank = res_aggr_rank + apply(resi[[i]], 1, rank)
 }
 res_aggr = res_aggr/length(bmr)
-res_aggr
+colnames(res_aggr) = sapply(lrns, getLearnerId)
+t(res_aggr)
 
 # average rank matrix
 res_aggr_rank = res_aggr_rank/length(bmr)
+rownames(res_aggr_rank) = sapply(lrns, getLearnerId)
 res_aggr_rank
 
+# Analysis of time
+time = matrix(NA, length(bmr),  ncol(resi[[1]]))
+for(i in 1:30) {
+  time[i,] = unlist(resi[[i]][5,])
+}
+time_order = order(time[,1])
+time = time[time_order,]
+plot(time[,1], type = "l", ylim = c(0, max(time, na.rm = T)), ylab = "Time in seconds", xlab = "Dataset number")
+for(i in 2:ncol(time))
+  lines(time[,i], col = i)
+legend("topleft", legend = sapply(lrns, getLearnerId), col = 1:ncol(time), lty = 1)
+
+# Graphical analysis of performance
+perfi = matrix(NA, length(bmr),  ncol(resi[[1]]))
+for(j in c(1:4)) {
+  for(i in 1:30) {
+    perfi[i,] = unlist(resi[[i]][j,])
+  }
+  #perfi = perfi[time_order,]
+  perfi = perfi[order(perfi[,1]),]
+  print(plot(perfi[,1], type = "l", ylim = c(min(perfi, na.rm = T), max(perfi, na.rm = T)), ylab = rownames(res_aggr)[j], xlab = "Dataset number"))
+  for(i in 2:ncol(time))
+    lines(perfi[,i], col = i)
+  legend("topleft", legend = sapply(lrns, getLearnerId), col = 1:ncol(perfi), lty = 1)
+}
 
 
+# Anhang
+# regression
 
 # big (between 10 minutes and 1 hour)
 task.ids.bmr3 = task.ids[which((unlist(time.estimate))>600 & (unlist(time.estimate))<3600)]
