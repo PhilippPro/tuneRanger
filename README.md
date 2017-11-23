@@ -31,7 +31,7 @@ Quickstart:
     iris.task = makeClassifTask(data = iris, target = "Species")
     
     # Rough Estimation of the Tuning time
-    estimateTuneRFTime(iris.task)
+    estimateTimeTuneRF(iris.task)
 
     # Tuning process (takes around 1 minute); Tuning measure is the multiclass brier score
     res = tuneRF(iris.task, measure = list(multiclass.brier), num.trees = 1000, 

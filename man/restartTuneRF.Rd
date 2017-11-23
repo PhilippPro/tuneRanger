@@ -27,7 +27,7 @@ library(mlr)
 # A mlr task has to be created in order to use the package
 # the already existing iris task is used here
 unlink("./optpath.RData")
-estimateTuneRFTime(iris.task)
+estimateTimeTuneRF(iris.task)
 res = tuneRF(iris.task, measure = list(multiclass.brier), num.trees = 1000, 
   num.threads = 8, iters = 100)
 
@@ -36,6 +36,6 @@ results = res$results
 results[results$multiclass.brier < quantile(results$multiclass.brier, 0.05),]
 
 # Restart after failing in one of the iterations:
-res = restartTuneRF("./optpath.RData", iris.task, measure = list(multiclass.brier))
+# res = restartTuneRF("./optpath.RData", iris.task, measure = list(multiclass.brier))
 
 }

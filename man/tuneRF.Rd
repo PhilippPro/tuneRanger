@@ -8,7 +8,7 @@ tuneRF(task, measure = NULL, iters = 100, num.threads = NULL,
   num.trees = 1000, parameters = list(replace = TRUE,
   respect.unordered.factors = TRUE), tune.parameters = c("mtry",
   "min.node.size", "sample.fraction"), save.file.path = "./optpath.RData",
-  build.final.model = FALSE)
+  build.final.model = TRUE)
 }
 \arguments{
 \item{task}{The mlr task created by \code{\link[mlr]{makeClassifTask}} or \code{\link[mlr]{makeRegrTask}}.}
@@ -32,7 +32,7 @@ directory. If one iteration fails the algorithm can be started again with \code{
 
 \item{build.final.model}{[\code{logical(1)}]\cr
 Should the best found model be fitted on the complete dataset?
-Default is \code{FALSE}.}
+Default is \code{TRUE}.}
 }
 \value{
 list with recommended parameters and a data.frame with all evaluated hyperparameters and performance and time results for each run
@@ -45,17 +45,23 @@ Model based optimization is used as tuning strategy and the three parameters min
 The measure that should be optimized can be chosen from the list of measures in mlr: http://mlr-org.github.io/mlr-tutorial/devel/html/measures/index.html
 }
 \examples{
+\dontrun{
 library(tuneRF)
 library(mlr)
 
 # A mlr task has to be created in order to use the package
 # the already existing iris task is used here
 unlink("./optpath.RData")
-estimateTuneRFTime(iris.task)
+estimateTimeTuneRF(iris.task)
 
 res = tuneRF(iris.task, measure = list(multiclass.brier), num.trees = 1000, 
   num.threads = 2, iters = 100)
   
-# Best 5 \% of the results
-res[res$multiclass.brier < quantile(res$multiclass.brier, 0.05),]
+# Mean of best 5 \% of the results
+res
+# Model with the new tuned hyperparameters
+res$model}
+}
+\seealso{
+\code{\link{estimateTimeTuneRF}} for time estimation.
 }

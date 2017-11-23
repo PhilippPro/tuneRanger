@@ -1,4 +1,4 @@
-#' estimateTuneRFTime
+#' estimateTimeTuneRF
 #'
 #' @param task The mlr task created by makeClassifTask or makeRegrTask. 
 #' @param iters Number of iterations. 
@@ -8,8 +8,8 @@
 #' @return estimated time for the tuning procedure
 #' @export
 #' @examples
-#' estimateTuneRFTime(iris.task)
-estimateTuneRFTime = function(task, iters = 100, num.threads = 1, num.trees = 1000, respect.unordered.factors = TRUE) {
+#' estimateTimeTuneRF(iris.task)
+estimateTimeTuneRF = function(task, iters = 100, num.threads = 1, num.trees = 1000, respect.unordered.factors = TRUE) {
   type = getTaskType(task)
   NFeats = getTaskNFeats(task)
   mtry = ceiling(NFeats/2)

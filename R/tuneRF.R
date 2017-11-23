@@ -15,25 +15,30 @@
 #' directory. If one iteration fails the algorithm can be started again with \code{\link{restartTuneRF}}.
 #' @param build.final.model [\code{logical(1)}]\cr
 #'   Should the best found model be fitted on the complete dataset?
-#'   Default is \code{TRUE}.
+#'   Default is \code{TRUE}. 
+#' @import mlr mlrMBO ParamHelpers
 #' @return list with recommended parameters and a data.frame with all evaluated hyperparameters and performance and time results for each run
 #' @details Model based optimization is used as tuning strategy and the three parameters min.node.size, sample.fraction and mtry are tuned at once. Out-of-bag predictions are used for evaluation, which makes it much faster than other packages and tuning strategies that use for example 5-fold cross-validation. Classification as well as regression is supported. 
 #' The measure that should be optimized can be chosen from the list of measures in mlr: http://mlr-org.github.io/mlr-tutorial/devel/html/measures/index.html
+#' @seealso \code{\link{estimateTimeTuneRF}} for time estimation.
 #' @export
 #' @examples 
+#' \dontrun{
 #' library(tuneRF)
 #' library(mlr)
 #' 
 #' # A mlr task has to be created in order to use the package
 #' # the already existing iris task is used here
 #' unlink("./optpath.RData")
-#' estimateTuneRFTime(iris.task)
+#' estimateTimeTuneRF(iris.task)
 #' 
 #' res = tuneRF(iris.task, measure = list(multiclass.brier), num.trees = 1000, 
 #'   num.threads = 2, iters = 100)
 #'   
-#' # Best 5 % of the results
-#' res[res$multiclass.brier < quantile(res$multiclass.brier, 0.05),]
+#' # Mean of best 5 % of the results
+#' res
+#' # Model with the new tuned hyperparameters
+#' res$model}
 tuneRF = function(task, measure = NULL, iters = 100, num.threads = NULL, num.trees = 1000, 
   parameters = list(replace = TRUE, respect.unordered.factors = TRUE), 
   tune.parameters = c("mtry", "min.node.size", "sample.fraction"), save.file.path = "./optpath.RData",
@@ -143,9 +148,9 @@ tuneRF = function(task, measure = NULL, iters = 100, num.threads = NULL, num.tre
   res = res[, c(tune.parameters, measure.name, "exec.time")]
   
   if (minimize) {
-    recommended.pars = lapply(res[res[, measure.name] <= quantile(res[, measure.name], 0.05),], summary.function)
+    recommended.pars = lapply(res[res[, measure.name] <= quantile(res[, measure.name], 0.05),], summaryfunction)
   } else {
-    recommended.pars = lapply(res[res[, measure.name] >= quantile(res[, measure.name], 0.95),], summary.function)
+    recommended.pars = lapply(res[res[, measure.name] >= quantile(res[, measure.name], 0.95),], summaryfunction)
   }
   recommended.pars = data.frame(recommended.pars)
   recommended.pars[colnames(res) %in% c("min.node.size", "mtry")] = round(recommended.pars[colnames(res) %in% c("min.node.size", "mtry")])
@@ -168,15 +173,18 @@ tuneRF = function(task, measure = NULL, iters = 100, num.threads = NULL, num.tre
   return(out)
 }
 
+#' @export
 print.tuneRF = function(x) {
   cat("Recommended parameter settings:", "\n")
   ln = length(x$recommended.pars)
   print(x$recommended.pars[-c(ln-1, ln)])
+  cat("Results:", "\n")
+  print(x$recommended.pars[c(ln-1, ln)])
 }
 
 #' @export
 trafo_nodesize_end = function(x, size) ceiling(2^(log(size * 0.2, 2) * x))
 
 #' @export
-summary.function = function(x) ifelse(class(x) %in% c("numeric", "integer"), mean(x), 
+summaryfunction = function(x) ifelse(class(x) %in% c("numeric", "integer"), mean(x), 
   names(sort(table(x), decreasing = TRUE)[1]))

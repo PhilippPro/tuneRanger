@@ -219,11 +219,17 @@ for(j in c(1:4)) {
 }
 
 
+
+
+
+
+
+
+
+
+
 # Anhang
 # regression
-
-
-
 
 # very big (more than one hour (up to 4 hours))
 task.ids.bmr4 = task.ids[which((unlist(time.estimate))>3600)]

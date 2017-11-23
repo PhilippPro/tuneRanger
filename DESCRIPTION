@@ -1,7 +1,7 @@
 Package: tuneRF
 Type: Package
 Title: Tune random forests
-Description: More about what it does (maybe more than one line)
+Description: Tuning random forest with one line.
 Version: 0.1
 Authors@R: c(
     person("Philipp", "Probst", email = "philipp_probst@gmx.de", role = c("aut", "cre")),
