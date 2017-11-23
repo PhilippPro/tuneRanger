@@ -101,6 +101,28 @@ for(i in seq_along(task.ids.bmr2)) {
 }
 load("./benchmark/bmr.RData")
 
+# big datasets (between 10 minutes and 1 hour)
+task.ids.bmr3 = task.ids[which((unlist(time.estimate))>600 & (unlist(time.estimate))<3600)]
+namen = numeric(length(task.ids.bmr3))
+for(i in seq_along(task.ids.bmr3)) {
+  print(i)
+  task = getOMLTask(task.ids.bmr3[i])
+  namen[i] = task$input$data.set$desc$name
+}
+task.ids.bmr3 = task.ids.bmr3[-c(8, 10:13)]
+# 8 datasets
+
+rdesc = makeResampleDesc("RepCV", reps = 2, folds = 5)
+for(i in seq_along(task.ids.bmr3)) {
+  print(i)
+  set.seed(245 + i)
+  task = getOMLTask(task.ids.bmr3[i])
+  task = convertOMLTaskToMlr(task)$mlr.task
+  bmr[[length(bmr) + 1]] = benchmark(lrns, task, rdesc, measures, keep.pred = FALSE, models = FALSE)
+  save(bmr, file = "./benchmark/bmr.RData")
+}
+load("./benchmark/bmr.RData")
+
 # Analysis
 
 # Data cleaning
@@ -200,27 +222,7 @@ for(j in c(1:4)) {
 # Anhang
 # regression
 
-# big (between 10 minutes and 1 hour)
-task.ids.bmr3 = task.ids[which((unlist(time.estimate))>600 & (unlist(time.estimate))<3600)]
-namen = numeric(length(task.ids.bmr3))
-for(i in seq_along(task.ids.bmr3)) {
-  print(i)
-  task = getOMLTask(task.ids.bmr3[i])
-  namen[i] = task$input$data.set$desc$name
-}
-task.ids.bmr3 = task.ids.bmr3[-c(8, 10:13)]
-# 8 datasets
 
-rdesc = makeResampleDesc("RepCV", reps = 2, folds = 5)
-for(i in seq_along(task.ids.bmr3)) {
-  print(i)
-  set.seed(245 + i)
-  task = getOMLTask(task.ids.bmr3[i])
-  task = convertOMLTaskToMlr(task)$mlr.task
-  bmr[[length(bmr) + 1]] = benchmark(lrns, task, rdesc, measures, keep.pred = FALSE, models = FALSE)
-  save(bmr, file = "./benchmark/bmr.RData")
-}
-load("./benchmark/bmr.RData")
 
 
 # very big (more than one hour (up to 4 hours))
