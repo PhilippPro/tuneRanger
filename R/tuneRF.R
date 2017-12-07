@@ -140,7 +140,22 @@ tuneRF = function(task, measure = NULL, iters = 100, num.threads = NULL, num.tre
   mbo.learner = makeLearner("regr.km", covtype = "matern3_2", optim.method = "BFGS", nugget.estim = TRUE, 
     jitter = TRUE, predict.type = "se", config = list(show.learner.output = FALSE))
   
-  result = mbo(fun = objFun, design = design, learner = mbo.learner, control = control, show.info = show.info)
+  result = withCallingHandlers(mbo(fun = objFun, design = design, learner = mbo.learner, control = control, show.info = show.info),
+    warning = function(w) {
+      if (grepl("You turned off the final saving of the optimization result at \\(iter \\+ 1\\)\\! Do you really want this\\?", w$message)) {
+        invokeRestart("muffleWarning") 
+      } else {
+        message(w$message)
+      }
+    }, 
+    message = function(m) {
+      if (grepl("Computing y column\\(s\\) for design\\. Not provided\\.", m$message)) {
+        invokeRestart("muffleMessage") 
+      } else {
+        message(m$message)
+      }
+    }
+  )
   
   res = data.frame(result$opt.path)
   if("min.node.size" %in% tune.parameters)
