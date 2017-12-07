@@ -16,6 +16,7 @@
 #' @param build.final.model [\code{logical(1)}]\cr
 #'   Should the best found model be fitted on the complete dataset?
 #'   Default is \code{TRUE}. 
+#' @param show.info Verbose mlrMBO output on console? Default is \code{TRUE}.
 #' @import mlr mlrMBO ParamHelpers
 #' @return list with recommended parameters and a data.frame with all evaluated hyperparameters and performance and time results for each run
 #' @details Model based optimization is used as tuning strategy and the three parameters min.node.size, sample.fraction and mtry are tuned at once. Out-of-bag predictions are used for evaluation, which makes it much faster than other packages and tuning strategies that use for example 5-fold cross-validation. Classification as well as regression is supported. 
@@ -42,7 +43,7 @@
 tuneRF = function(task, measure = NULL, iters = 100, num.threads = NULL, num.trees = 1000, 
   parameters = list(replace = TRUE, respect.unordered.factors = TRUE), 
   tune.parameters = c("mtry", "min.node.size", "sample.fraction"), save.file.path = "./optpath.RData",
-  build.final.model = TRUE) {
+  build.final.model = TRUE, show.info = getOption("mlrMBO.show.info", TRUE)) {
   
   unlink(save.file.path)
   
@@ -139,7 +140,7 @@ tuneRF = function(task, measure = NULL, iters = 100, num.threads = NULL, num.tre
   mbo.learner = makeLearner("regr.km", covtype = "matern3_2", optim.method = "BFGS", nugget.estim = TRUE, 
     jitter = TRUE, predict.type = "se", config = list(show.learner.output = FALSE))
   
-  result = mbo(fun = objFun, design = design, learner = mbo.learner, control = control)
+  result = mbo(fun = objFun, design = design, learner = mbo.learner, control = control, show.info = show.info)
   
   res = data.frame(result$opt.path)
   if("min.node.size" %in% tune.parameters)
