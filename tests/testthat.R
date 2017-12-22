@@ -1,4 +1,4 @@
 library(testthat)
-library(tuneRF)
+library(tuneRanger)
 
-test_check("tuneRF")
+test_check("tuneRanger")

@@ -1,31 +1,32 @@
 
 # Finally make more parameters possible. This is just a test version.
-makeRLearner.classif.tuneRF = function() {
+makeRLearner.classif.tuneRanger = function() {
   makeRLearnerClassif(
-    cl = "classif.tuneRF",
-    package = "tuneRF",
+    cl = "classif.tuneRanger",
+    package = "tuneRanger",
     par.set = makeParamSet(
       makeUntypedLearnerParam(id = "measure", default = multiclass.brier),
-      makeIntegerLearnerParam(id = "iters", lower = 1L, default = 100L),
+      makeIntegerLearnerParam(id = "iters", lower = 1L, default = 70L),
+      makeIntegerLearnerParam(id = "iters.warmup", lower = 1L, default = 30L),
       makeIntegerLearnerParam(id = "num.threads", lower = 1L, when = "both", tunable = FALSE),
       makeIntegerLearnerParam(id = "num.trees", lower = 1L, default = 500L)
     ),
     properties = c("twoclass", "multiclass", "prob", "numerics", "factors", "ordered", "featimp", "weights", "oobpreds"),
     name = "Random Forests",
-    short.name = "tuneRF",
+    short.name = "tuneRanger",
     note = "By default, internal parallelization is switched off (`num.threads = 1`), `verbose` output is disabled, `respect.unordered.factors` is set to `TRUE`. All settings are changeable.",
-    callees = "tuneRF"
+    callees = "tuneRanger"
   )
 }
 
 # task, measure = NULL, iters = 100, num.threads = NULL, num.trees = 1000, 
 # parameters = list(replace = TRUE, respect.unordered.factors = TRUE
 
-trainLearner.classif.tuneRF = function(.learner, .task, .subset, .weights = NULL, ...) {
-  tuneRF::tuneRF(task = subsetTask(.task, .subset), build.final.model = TRUE, ...)$model
+trainLearner.classif.tuneRanger = function(.learner, .task, .subset, .weights = NULL, ...) {
+  tuneRanger::tuneRanger(task = subsetTask(.task, .subset), build.final.model = TRUE, ...)$model
 }
 
-predictLearner.classif.tuneRF = function(.learner, .model, .newdata, ...) {
+predictLearner.classif.tuneRanger = function(.learner, .model, .newdata, ...) {
   model = .model$learner.model$learner.model
   p = predict(object = model, data = .newdata, ...)
   if (.learner$predict.type == "response") {

@@ -1,5 +1,5 @@
 library(devtools)
-load_all("../tuneRF")
+load_all("../tuneRanger")
 
 # Compare runtime and AUC/Brier Score with mlr
 library(mlr)
@@ -9,13 +9,13 @@ library(mlrHyperopt)
 source("./benchmark/RLearner_classif_hyperoptRanger.R")
 
 lrns = list(
-  makeLearner("classif.tuneRF", id = "tuneRFMMCE", predict.type = "prob", 
+  makeLearner("classif.tuneRanger", id = "tuneRangerMMCE", predict.type = "prob", 
     par.vals = list(num.trees = 2000, num.threads = 10, measure = list(mmce))),
-  makeLearner("classif.tuneRF", id = "tuneRFAUC", predict.type = "prob", 
+  makeLearner("classif.tuneRanger", id = "tuneRangerAUC", predict.type = "prob", 
     par.vals = list(num.trees = 2000, num.threads = 10, measure = list(multiclass.au1p))),
-  makeLearner("classif.tuneRF", id = "tuneRFBrier", predict.type = "prob", 
+  makeLearner("classif.tuneRanger", id = "tuneRangerBrier", predict.type = "prob", 
     par.vals = list(num.trees = 2000, num.threads = 10, measure = list(multiclass.brier))), 
-  makeLearner("classif.tuneRF", id = "tuneRFLogloss", predict.type = "prob", 
+  makeLearner("classif.tuneRanger", id = "tuneRangerLogloss", predict.type = "prob", 
     par.vals = list(num.trees = 2000, num.threads = 10, measure = list(logloss))), 
   makeLearner("classif.hyperoptRanger", id = "hyperopt", predict.type = "prob"), 
   makeLearner("classif.caretRanger", id = "caret", predict.type = "prob"), 
@@ -138,6 +138,14 @@ names = names(bmr[[20]]$results$`kr-vs-kp`$tuneRFMMCE$aggr)
 bmr[[20]]$results$`kr-vs-kp`$tuneRFMMCE$aggr = colMeans(resis)[2:6]
 names(bmr[[20]]$results$`kr-vs-kp`$tuneRFMMCE$aggr) = names
 
+
+# mlr summary functions
+bmr_tot = bmr[[1]]
+for(i in 2:length(bmr))
+  bmr_tot$results = c(bmr_tot$results, bmr[[i]]$results)
+plotBMRSummary(bmr_tot, pretty.names = F, pointsize = 4, jitter = 0.1, measure = multiclass.au1p)
+
+
 # Wilcoxon paired test
 library(mlr)
 data = array(NA, dim = c(length(bmr), 2, 5))
@@ -179,18 +187,29 @@ for(i in 2:length(bmr)) {
     resi[[i]][2,6] = min(resi[[i]][2,], na.rm = T)
     resi[[i]][3,6] = max(resi[[i]][3,], na.rm = T)
     resi[[i]][4,6] = max(resi[[i]][4,], na.rm = T)
+    resi[[i]][5,6] = max(resi[[i]][5,], na.rm = T)
   }
   res_aggr = res_aggr + resi[[i]]
   res_aggr_rank = res_aggr_rank + apply(resi[[i]], 1, rank)
 }
 res_aggr = res_aggr/length(bmr)
 colnames(res_aggr) = sapply(lrns, getLearnerId)
+library(stringr)
+rownames(res_aggr) = str_sub(rownames(res_aggr), start=1, end=-11)
 t(res_aggr)
 
 # average rank matrix
 res_aggr_rank = res_aggr_rank/length(bmr)
 rownames(res_aggr_rank) = sapply(lrns, getLearnerId)
+colnames(res_aggr_rank) = str_sub(colnames(res_aggr_rank), start=1, end=-11)
 res_aggr_rank
+
+library(knitr)
+rownames(res_aggr) = paste("--", c("Error rate", "(Multiclass) AUC", "Brier Score", "Logarithmic Loss", "Training Runtime"))
+kable(t(round(res_aggr,4)))
+colnames(res_aggr_rank) = paste("--", c("Error rate", "(Multiclass) AUC", "Brier Score", "Logarithmic Loss", "Training Runtime"))
+kable(round(res_aggr_rank,2))
+
 
 # Analysis of time
 time = matrix(NA, length(bmr),  ncol(resi[[1]]))
@@ -216,6 +235,20 @@ for(j in c(1:4)) {
   for(i in 2:ncol(time))
     lines(perfi[,i], col = i)
   legend("topleft", legend = sapply(lrns, getLearnerId), col = 1:ncol(perfi), lty = 1)
+}
+
+# Compared to ranger model
+perfi = matrix(NA, length(bmr),  ncol(resi[[1]]))
+for(j in c(1:4)) {
+  for(i in 1:30) {
+    perfi[i,] = unlist(resi[[i]][j,]) - unlist(resi[[i]][j,7])
+  }
+  #perfi = perfi[time_order,]
+  #perfi = perfi[order(perfi[,1]),]
+  print(plot(perfi[,1], type = "l", ylim = c(min(perfi, na.rm = T), max(perfi, na.rm = T)), ylab = rownames(res_aggr)[j], xlab = "Dataset number"))
+  for(i in 2:ncol(time))
+    lines(perfi[,i], col = i)
+  legend("bottomright", legend = sapply(lrns, getLearnerId), col = 1:ncol(perfi), lty = 1)
 }
 
 

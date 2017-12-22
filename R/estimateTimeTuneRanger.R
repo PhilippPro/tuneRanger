@@ -1,4 +1,4 @@
-#' estimateTimeTuneRF
+#' estimateTimeTuneRanger
 #'
 #' @param task The mlr task created by makeClassifTask or makeRegrTask. 
 #' @param iters Number of iterations. 
@@ -6,10 +6,12 @@
 #' @param num.trees Number of trees.
 #' @param respect.unordered.factors Handling of unordered factor covariates. One of 'ignore', 'order' and 'partition'. For the "extratrees" splitrule the default is "partition" for all other splitrules 'ignore'. Alternatively TRUE (='order') or FALSE (='ignore') can be used. See below for details.
 #' @return estimated time for the tuning procedure
+#' @importFrom methods slot<-
+#' @importFrom lubridate period
 #' @export
 #' @examples
-#' estimateTimeTuneRF(iris.task)
-estimateTimeTuneRF = function(task, iters = 100, num.threads = 1, num.trees = 1000, respect.unordered.factors = TRUE) {
+#' estimateTimeTuneRanger(iris.task)
+estimateTimeTuneRanger = function(task, iters = 100, num.threads = 1, num.trees = 1000, respect.unordered.factors = TRUE) {
   type = getTaskType(task)
   NFeats = getTaskNFeats(task)
   mtry = ceiling(NFeats/2)

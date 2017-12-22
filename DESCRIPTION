@@ -1,4 +1,4 @@
-Package: tuneRF
+Package: tuneRanger
 Type: Package
 Title: Tune random forests
 Description: Tuning random forest with one line.
@@ -14,9 +14,13 @@ Depends:
     mlr (>= 2.0),
     mlrMBO (>= 1.1.0),
     lubridate (>= 1.6.0), 
-    DiceKriging (>= 1.5.5),
     rgenoud (>= 5.7-12.4),
-    parallel (>= 3.3.3)
+    parallel (>= 3.3.3), 
+    ParamHelpers (>= 1.11),
+    methods (>= 3.3.3),
+    lhs (>= 0.14),
+    smoof (>= 1.5.1),
+    BBmisc (>= 1.11)
 LazyData: yes
 ByteCompile: yes
 Date: 2017-06-30

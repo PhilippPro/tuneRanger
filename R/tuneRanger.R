@@ -1,10 +1,11 @@
-#' tuneRF
+#' tuneRanger
 #' 
 #' Automatic tuning of random forests of the (\code{\link[ranger]{ranger}}) package with one line of code. 
 #'
 #' @param task The mlr task created by \code{\link[mlr]{makeClassifTask}} or \code{\link[mlr]{makeRegrTask}}. 
 #' @param measure Performance measure to evaluate. Default is auc for classification and mse for regression. Other possible performance measures can be looked up here: https://mlr-org.github.io/mlr-tutorial/release/html/performance/index.html
-#' @param iters Number of iterations. 
+#' @param iters Number of iterations. Default is 70.
+#' @param iters.warmup Number of iterations for the warmup. Default is 30. 
 #' @param num.threads Number of threads. Default is number of CPUs available.
 #' @param num.trees Number of trees.
 #' @param parameters Optional list of fixed named parameters that should be passed to \code{\link[ranger]{ranger}}.
@@ -12,34 +13,37 @@
 #' Default is mtry, min.node.size and sample.fraction. Additionally replace and respect.unordered.factors can be 
 #' included in the tuning process.
 #' @param save.file.path File to which interim results are saved. Default is optpath.RData in the current working 
-#' directory. If one iteration fails the algorithm can be started again with \code{\link{restartTuneRF}}.
+#' directory. If one iteration fails the algorithm can be started again with \code{\link{restartTuneRanger}}.
 #' @param build.final.model [\code{logical(1)}]\cr
 #'   Should the best found model be fitted on the complete dataset?
 #'   Default is \code{TRUE}. 
-#' @import mlr mlrMBO ParamHelpers
+#' @import ranger mlr mlrMBO ParamHelpers BBmisc stats smoof lhs parallel rgenoud
 #' @return list with recommended parameters and a data.frame with all evaluated hyperparameters and performance and time results for each run
 #' @details Model based optimization is used as tuning strategy and the three parameters min.node.size, sample.fraction and mtry are tuned at once. Out-of-bag predictions are used for evaluation, which makes it much faster than other packages and tuning strategies that use for example 5-fold cross-validation. Classification as well as regression is supported. 
 #' The measure that should be optimized can be chosen from the list of measures in mlr: http://mlr-org.github.io/mlr-tutorial/devel/html/measures/index.html
-#' @seealso \code{\link{estimateTimeTuneRF}} for time estimation.
+#' @seealso \code{\link{estimateTimeTuneRanger}} for time estimation.
 #' @export
 #' @examples 
 #' \dontrun{
-#' library(tuneRF)
+#' library(tuneRanger)
 #' library(mlr)
 #' 
 #' # A mlr task has to be created in order to use the package
-#' # the already existing iris task is used here
+#' data(iris)
+#' iris.task = makeClassifTask(data = iris, target = "Species")
 #' unlink("./optpath.RData")
-#' estimateTimeTuneRF(iris.task)
 #' 
-#' res = tuneRF(iris.task, measure = list(multiclass.brier), num.trees = 1000, 
-#'   num.threads = 2, iters = 100)
+#' # Estimate runtime
+#' estimateTimeTuneRanger(iris.task)
+#' # Tuning
+#' res = tuneRanger(iris.task, measure = list(multiclass.brier), num.trees = 1000, 
+#'   num.threads = 2, iters = 70)
 #'   
 #' # Mean of best 5 % of the results
 #' res
 #' # Model with the new tuned hyperparameters
 #' res$model}
-tuneRF = function(task, measure = NULL, iters = 100, num.threads = NULL, num.trees = 1000, 
+tuneRanger = function(task, measure = NULL, iters = 70, iters.warmup = 30, num.threads = NULL, num.trees = 1000, 
   parameters = list(replace = TRUE, respect.unordered.factors = TRUE), 
   tune.parameters = c("mtry", "min.node.size", "sample.fraction"), save.file.path = "./optpath.RData",
   build.final.model = TRUE) {
@@ -48,7 +52,7 @@ tuneRF = function(task, measure = NULL, iters = 100, num.threads = NULL, num.tre
   
   fixed.param.in.tune = names(parameters) %in% tune.parameters
   if(any(fixed.param.in.tune))
-    stopf("Fixed parameter %s cannot be tuning parameter at the same time.", names(parameters)[fixed.param.in.tune][1])
+    BBmisc::stopf("Fixed parameter %s cannot be tuning parameter at the same time.", names(parameters)[fixed.param.in.tune][1])
   
   type = getTaskType(task)
   size = getTaskSize(task)
@@ -57,7 +61,7 @@ tuneRF = function(task, measure = NULL, iters = 100, num.threads = NULL, num.tre
   predict.type = ifelse(type == "classif", "prob", "response")
   if(is.null(measure)) {
     if(type == "classif") {
-      cls.levels = getTaskClassLevels(iris.task)
+      cls.levels = getTaskClassLevels(task)
       if(length(cls.levels) == 2) {
         measure = list(brier)
       } else {
@@ -73,7 +77,7 @@ tuneRF = function(task, measure = NULL, iters = 100, num.threads = NULL, num.tre
   
   # Set the number of threads if not given by user
   if(is.null(num.threads))
-    num.threads = detectCores()
+    num.threads = parallel::detectCores()
   
   # Evaluation function
   performan = function(x) {
@@ -99,16 +103,17 @@ tuneRF = function(task, measure = NULL, iters = 100, num.threads = NULL, num.tre
   
   # Budget
   f.evals = iters
-  mbo.init.design.size = 30
+  
+  mbo.init.design.size = iters.warmup
   
   # Focus search
   infill.opt = "focussearch"
-  mbo.focussearch.points = iters
+  mbo.focussearch.points = iters + iters.warmup
   mbo.focussearch.maxit = 3
   mbo.focussearch.restarts = 3
   
   # The final SMOOF objective function
-  objFun = makeMultiObjectiveFunction(
+  objFun = smoof::makeMultiObjectiveFunction(
     name = "reg",
     fn = performan,
     par.set = ps,
@@ -127,7 +132,7 @@ tuneRF = function(task, measure = NULL, iters = 100, num.threads = NULL, num.tre
   }
   
   control = makeMBOControl(n.objectives = 1L, propose.points = mbo.prop.points, # impute.y.fun = function(x, y, opt.path) 0.7, 
-    save.on.disk.at = 1:(iters-30+1), save.file.path = save.file.path)
+    save.on.disk.at = 1:iters, save.file.path = save.file.path)
   control = setMBOControlTermination(control, max.evals = f.evals, iters = 300)
   control = setMBOControlInfill(control, #opt = infill.opt,
     opt.focussearch.maxit = mbo.focussearch.maxit,
@@ -148,9 +153,9 @@ tuneRF = function(task, measure = NULL, iters = 100, num.threads = NULL, num.tre
   res = res[, c(tune.parameters, measure.name, "exec.time")]
   
   if (minimize) {
-    recommended.pars = lapply(res[res[, measure.name] <= quantile(res[, measure.name], 0.05),], summaryfunction)
+    recommended.pars = lapply(res[res[, measure.name] <= stats::quantile(res[, measure.name], 0.05),], summaryfunction)
   } else {
-    recommended.pars = lapply(res[res[, measure.name] >= quantile(res[, measure.name], 0.95),], summaryfunction)
+    recommended.pars = lapply(res[res[, measure.name] >= stats::quantile(res[, measure.name], 0.95),], summaryfunction)
   }
   recommended.pars = data.frame(recommended.pars)
   recommended.pars[colnames(res) %in% c("min.node.size", "mtry")] = round(recommended.pars[colnames(res) %in% c("min.node.size", "mtry")])
@@ -160,7 +165,7 @@ tuneRF = function(task, measure = NULL, iters = 100, num.threads = NULL, num.tre
     ln.rec.pars = length(recommended.pars)
     x = as.list(recommended.pars[-c(ln.rec.pars - 1, ln.rec.pars)])
     x = c(x, num.trees = num.trees, num.threads = num.threads, parameters)
-    lrn = makeLearner(paste0(type, ".ranger"), par.vals = x, predict.type = predict.type)
+    lrn = mlr::makeLearner(paste0(type, ".ranger"), par.vals = x, predict.type = predict.type)
     mlr::train(lrn, task)
   } else {
     NULL
@@ -169,12 +174,12 @@ tuneRF = function(task, measure = NULL, iters = 100, num.threads = NULL, num.tre
   unlink(save.file.path)
   
   out = list(recommended.pars = recommended.pars, results = res, model = mod)
-  class(out) = "tuneRF"
+  class(out) = "tuneRanger"
   return(out)
 }
 
 #' @export
-print.tuneRF = function(x) {
+print.tuneRanger = function(x, ...) {
   cat("Recommended parameter settings:", "\n")
   ln = length(x$recommended.pars)
   print(x$recommended.pars[-c(ln-1, ln)])
@@ -182,9 +187,7 @@ print.tuneRF = function(x) {
   print(x$recommended.pars[c(ln-1, ln)])
 }
 
-#' @export
 trafo_nodesize_end = function(x, size) ceiling(2^(log(size * 0.2, 2) * x))
 
-#' @export
 summaryfunction = function(x) ifelse(class(x) %in% c("numeric", "integer"), mean(x), 
   names(sort(table(x), decreasing = TRUE)[1]))
