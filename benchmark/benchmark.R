@@ -7,26 +7,31 @@ library(mlr)
 source("./benchmark/RLearner_classif_caretRanger.R")
 library(mlrHyperopt)
 source("./benchmark/RLearner_classif_hyperoptRanger.R")
+library(randomForest)
+source("./benchmark/RLearner_classif_tuneRF.R")
 
 lrns = list(
-  makeLearner("classif.tuneRanger", id = "tuneRangerMMCE", predict.type = "prob", 
+  makeLearner("classif.tuneRanger", id = "tuneRFMMCE", predict.type = "prob", 
     par.vals = list(num.trees = 2000, num.threads = 10, measure = list(mmce))),
-  makeLearner("classif.tuneRanger", id = "tuneRangerAUC", predict.type = "prob", 
+  makeLearner("classif.tuneRanger", id = "tuneRFAUC", predict.type = "prob", 
     par.vals = list(num.trees = 2000, num.threads = 10, measure = list(multiclass.au1p))),
-  makeLearner("classif.tuneRanger", id = "tuneRangerBrier", predict.type = "prob", 
+  makeLearner("classif.tuneRanger", id = "tuneRFBrier", predict.type = "prob", 
     par.vals = list(num.trees = 2000, num.threads = 10, measure = list(multiclass.brier))), 
-  makeLearner("classif.tuneRanger", id = "tuneRangerLogloss", predict.type = "prob", 
+  makeLearner("classif.tuneRanger", id = "tuneRFLogloss", predict.type = "prob", 
     par.vals = list(num.trees = 2000, num.threads = 10, measure = list(logloss))), 
   makeLearner("classif.hyperoptRanger", id = "hyperopt", predict.type = "prob"), 
   makeLearner("classif.caretRanger", id = "caret", predict.type = "prob"), 
   makeLearner("classif.ranger", id = "ranger", par.vals = list(num.trees = 2000, respect.unordered.factors = TRUE), predict.type = "prob")
 )
 
+lrn = makeLearner("classif.tuneRF", id = "tuneRF", predict.type = "prob")
+
 rdesc = makeResampleDesc("CV", iters = 2)
 measures = list(mmce, multiclass.au1p, multiclass.brier, logloss, timetrain)
 configureMlr(on.learner.error = "warn")
 set.seed(123)
 bmr1 = benchmark(lrns, iris.task, rdesc, measures)
+bmrrrr = benchmark(lrn, iris.task, rdesc, measures)
 
 library(OpenML)
 task.ids = listOMLTasks(number.of.classes = 2L, number.of.missing.values = 0, data.tag = "OpenML100", estimation.procedure = "10-fold Crossvalidation")$task.id
@@ -77,6 +82,15 @@ for(i in seq_along(task.ids.bmr)) {
 load("./benchmark/bmr.RData")
 # Which datasets are not super easy (AUC < 0.99) and discriminate between the algorithms?
 
+bmr_tuneRF = list()
+for(i in seq_along(task.ids.bmr)) {
+  print(i)
+  set.seed(145 + i)
+  task = getOMLTask(task.ids.bmr[i])
+  task = convertOMLTaskToMlr(task)$mlr.task
+  bmr_tuneRF[[i]] = benchmark(lrn, task, rdesc, measures, keep.pred = FALSE, models = FALSE)
+  save(bmr_tuneRF, file = "./benchmark/bmr_tuneRF.RData")
+}
 # 80 h auf einem Core -> 8 h
 
 # medium datasets (between 160 seconds and 10 minutes)
@@ -112,7 +126,7 @@ for(i in seq_along(task.ids.bmr3)) {
 task.ids.bmr3 = task.ids.bmr3[-c(8, 10:13)]
 # 8 datasets
 
-rdesc = makeResampleDesc("RepCV", reps = 2, folds = 5)
+rdesc = makeResampleDesc("CV", iters = 5)
 for(i in seq_along(task.ids.bmr3)) {
   print(i)
   set.seed(245 + i)
@@ -125,6 +139,7 @@ load("./benchmark/bmr.RData")
 
 # Analysis
 
+library(mlr)
 # Data cleaning
 # caret problems
 a = bmr[[30]]
@@ -193,16 +208,22 @@ for(i in 2:length(bmr)) {
   res_aggr_rank = res_aggr_rank + apply(resi[[i]], 1, rank)
 }
 res_aggr = res_aggr/length(bmr)
-colnames(res_aggr) = sapply(lrns, getLearnerId)
+lrn.names = c(paste0("tuneRanger", c("MMCE", "AUC", "Brier", "Logloss")), "hyperopt", "caret", "ranger")
+colnames(res_aggr) = lrn.names
 library(stringr)
 rownames(res_aggr) = str_sub(rownames(res_aggr), start=1, end=-11)
 t(res_aggr)
+rownames(res_aggr) = c("Error rate", "(Multiclass) AUC", "Brier Score", "Logarithmic Loss", "Training Runtime")
+library(xtable)
+xtable(t(res_aggr), digits = 4, caption = "Average performance results of the different algorithms for the small datasets", label = "avg_small")
 
 # average rank matrix
 res_aggr_rank = res_aggr_rank/length(bmr)
-rownames(res_aggr_rank) = sapply(lrns, getLearnerId)
+
+rownames(res_aggr_rank) = lrn.names
 colnames(res_aggr_rank) = str_sub(colnames(res_aggr_rank), start=1, end=-11)
-res_aggr_rank
+colnames(res_aggr_rank) = c("Error rate", "(Multiclass) AUC", "Brier Score", "Logarithmic Loss", "Training Runtime")
+xtable(res_aggr_rank, digits = 2, caption = "Average rank results of the different algorithms for the small datasets", label = "rank_small")
 
 library(knitr)
 rownames(res_aggr) = paste("--", c("Error rate", "(Multiclass) AUC", "Brier Score", "Logarithmic Loss", "Training Runtime"))
@@ -221,7 +242,7 @@ time = time[time_order,]
 plot(time[,1], type = "l", ylim = c(0, max(time, na.rm = T)), ylab = "Time in seconds", xlab = "Dataset number")
 for(i in 2:ncol(time))
   lines(time[,i], col = i)
-legend("topleft", legend = sapply(lrns, getLearnerId), col = 1:ncol(time), lty = 1)
+legend("topleft", legend = lrn.names, col = 1:ncol(time), lty = 1)
 
 # Graphical analysis of performance
 perfi = matrix(NA, length(bmr),  ncol(resi[[1]]))
@@ -234,15 +255,20 @@ for(j in c(1:4)) {
   print(plot(perfi[,1], type = "l", ylim = c(min(perfi, na.rm = T), max(perfi, na.rm = T)), ylab = rownames(res_aggr)[j], xlab = "Dataset number"))
   for(i in 2:ncol(time))
     lines(perfi[,i], col = i)
-  legend("topleft", legend = sapply(lrns, getLearnerId), col = 1:ncol(perfi), lty = 1)
+  legend("topleft", legend = lrn.names, col = 1:ncol(perfi), lty = 1)
 }
 
 # Compared to ranger model
+perfis = list()
+lrn.names2 = c(paste0("tR", c("MMCE", "AUC", "Brier", "Logloss")), "hyperopt", "caret", "ranger")
 perfi = matrix(NA, length(bmr),  ncol(resi[[1]]))
 for(j in c(1:4)) {
   for(i in 1:30) {
     perfi[i,] = unlist(resi[[i]][j,]) - unlist(resi[[i]][j,7])
   }
+  colnames(perfi) = lrn.names2
+  perfis[[j]] = perfi
+
   #perfi = perfi[time_order,]
   #perfi = perfi[order(perfi[,1]),]
   print(plot(perfi[,1], type = "l", ylim = c(min(perfi, na.rm = T), max(perfi, na.rm = T)), ylab = rownames(res_aggr)[j], xlab = "Dataset number"))
@@ -251,6 +277,19 @@ for(j in c(1:4)) {
   legend("bottomright", legend = sapply(lrns, getLearnerId), col = 1:ncol(perfi), lty = 1)
 }
 
+measure.names = c("Error rate", "(Multiclass) AUC", "Brier Score", "Logarithmic Loss")
+op <- par(mfrow = c(2,2),
+  oma = c(0,0,0,0) + 0.1,
+  mar = c(2,2,1,0) + 0.1)
+
+for(i in 1:4) {
+  boxplot(perfis[[i]], main = measure.names[i])
+  abline(0, 0, col = "red")
+}
+for(i in 1:4) {
+  boxplot(perfis[[i]], outline = FALSE, main = measure.names[i])
+  abline(0, 0, col = "red")
+}
 
 
 

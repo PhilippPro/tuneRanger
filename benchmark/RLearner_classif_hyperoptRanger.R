@@ -12,7 +12,7 @@ par.set.mlrHyperopt = makeParamSet(
     default = 1),
   keys = c("p"))
 par.config.mlrHyperopt = makeParConfig(
-  par.set = par.set,
+  par.set = par.set.mlrHyperopt,
   par.vals = list(num.trees = 2000, num.threads = 10),
   learner.name = "ranger"
 )

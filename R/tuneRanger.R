@@ -102,7 +102,7 @@ tuneRanger = function(task, measure = NULL, iters = 70, iters.warmup = 30, num.t
   ps$pars = ps$pars[tunable.parameters %in% tune.parameters]
   
   # Budget
-  f.evals = iters
+  f.evals = iters + iters.warmup
   
   mbo.init.design.size = iters.warmup
   
