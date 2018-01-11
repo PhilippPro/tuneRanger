@@ -68,5 +68,5 @@ res
 res$model}
 }
 \seealso{
-\code{\link{estimateTimeTuneRanger}} for time estimation.
+\code{\link{estimateTimeTuneRanger}} for time estimation and \code{\link{restartTuneRanger}} for continuing the algorithm if there was an error.
 }

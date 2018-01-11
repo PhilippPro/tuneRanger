@@ -21,7 +21,7 @@
 #' @return list with recommended parameters and a data.frame with all evaluated hyperparameters and performance and time results for each run
 #' @details Model based optimization is used as tuning strategy and the three parameters min.node.size, sample.fraction and mtry are tuned at once. Out-of-bag predictions are used for evaluation, which makes it much faster than other packages and tuning strategies that use for example 5-fold cross-validation. Classification as well as regression is supported. 
 #' The measure that should be optimized can be chosen from the list of measures in mlr: http://mlr-org.github.io/mlr-tutorial/devel/html/measures/index.html
-#' @seealso \code{\link{estimateTimeTuneRanger}} for time estimation.
+#' @seealso \code{\link{estimateTimeTuneRanger}} for time estimation and \code{\link{restartTuneRanger}} for continuing the algorithm if there was an error. 
 #' @export
 #' @examples 
 #' \dontrun{

@@ -21,21 +21,21 @@ lrns = list(
     par.vals = list(num.trees = 2000, num.threads = 10, measure = list(logloss))), 
   makeLearner("classif.hyperoptRanger", id = "hyperopt", predict.type = "prob"), 
   makeLearner("classif.caretRanger", id = "caret", predict.type = "prob"), 
+  makeLearner("classif.tuneRF", id = "tuneRF", predict.type = "prob"), 
   makeLearner("classif.ranger", id = "ranger", par.vals = list(num.trees = 2000, respect.unordered.factors = TRUE), predict.type = "prob")
 )
 
-lrn = makeLearner("classif.tuneRF", id = "tuneRF", predict.type = "prob")
+
 
 rdesc = makeResampleDesc("CV", iters = 2)
 measures = list(mmce, multiclass.au1p, multiclass.brier, logloss, timetrain)
 configureMlr(on.learner.error = "warn")
 set.seed(123)
 bmr1 = benchmark(lrns, iris.task, rdesc, measures)
-bmrrrr = benchmark(lrn, iris.task, rdesc, measures)
 
 library(OpenML)
 task.ids = listOMLTasks(number.of.classes = 2L, number.of.missing.values = 0, data.tag = "OpenML100", estimation.procedure = "10-fold Crossvalidation")$task.id
-task.ids = task.ids[-47]
+task.ids = task.ids[-47] # does not work
 # time estimation
 time.estimate = list()
 for(i in seq_along(task.ids)) {
@@ -67,11 +67,10 @@ for(i in seq_along(task.ids.bmr)) {
   task = getOMLTask(task.ids.bmr[i])
   namen[i] = task$input$data.set$desc$name
 }
-
 # each dataset only once
 task.ids.bmr = task.ids.bmr[-c(19, 20, 22:30)]
 
-for(i in seq_along(task.ids.bmr)) {
+for(i in seq_along(task.ids.bmr)) { # 19 datasets
   print(i)
   set.seed(145 + i)
   task = getOMLTask(task.ids.bmr[i])
@@ -81,17 +80,6 @@ for(i in seq_along(task.ids.bmr)) {
 }
 load("./benchmark/bmr.RData")
 # Which datasets are not super easy (AUC < 0.99) and discriminate between the algorithms?
-
-bmr_tuneRF = list()
-for(i in seq_along(task.ids.bmr)) {
-  print(i)
-  set.seed(145 + i)
-  task = getOMLTask(task.ids.bmr[i])
-  task = convertOMLTaskToMlr(task)$mlr.task
-  bmr_tuneRF[[i]] = benchmark(lrn, task, rdesc, measures, keep.pred = FALSE, models = FALSE)
-  save(bmr_tuneRF, file = "./benchmark/bmr_tuneRF.RData")
-}
-# 80 h auf einem Core -> 8 h
 
 # medium datasets (between 160 seconds and 10 minutes)
 task.ids.bmr2 = task.ids[which((unlist(time.estimate)-100)>60 & (unlist(time.estimate))<600)]
@@ -137,15 +125,28 @@ for(i in seq_along(task.ids.bmr3)) {
 }
 load("./benchmark/bmr.RData")
 
+# Very big datasets
+task.ids.bmr4 = task.ids[which((unlist(time.estimate))>=3600)]
+namen = numeric(length(task.ids.bmr4))
+for(i in seq_along(task.ids.bmr4)) {
+  print(i)
+  task = getOMLTask(task.ids.bmr4[i])
+  namen[i] = task$input$data.set$desc$name
+}
+task.ids.bmr4 = task.ids.bmr4[-c(5:9)]
+load("./benchmark/bmr.RData")
+
 # Analysis
 
 library(mlr)
 # Data cleaning
+
 # caret problems
 a = bmr[[30]]
 a$results$Australian$caret$measures.test
 # no results at all
-# mmce
+
+# tuneRangerMMCE problems
 a = bmr[[20]]
 resis = a$results$`kr-vs-kp`$tuneRFMMCE$measures.test
 resis = resis[!is.na(resis$mmce),]
@@ -153,12 +154,19 @@ names = names(bmr[[20]]$results$`kr-vs-kp`$tuneRFMMCE$aggr)
 bmr[[20]]$results$`kr-vs-kp`$tuneRFMMCE$aggr = colMeans(resis)[2:6]
 names(bmr[[20]]$results$`kr-vs-kp`$tuneRFMMCE$aggr) = names
 
+# tuneRF problems
+a = bmr[[4]]
+resis = a$results[[1]]$tuneRF$measures.test
+resis = resis[!is.na(resis$mmce),]
+names = names(bmr[[20]]$results$`kr-vs-kp`$tuneRFMMCE$aggr)
+bmr[[20]]$results$`kr-vs-kp`$tuneRFMMCE$aggr = colMeans(resis)[2:6]
+names(bmr[[20]]$results$`kr-vs-kp`$tuneRFMMCE$aggr) = names
 
 # mlr summary functions
 bmr_tot = bmr[[1]]
 for(i in 2:length(bmr))
   bmr_tot$results = c(bmr_tot$results, bmr[[i]]$results)
-plotBMRSummary(bmr_tot, pretty.names = F, pointsize = 4, jitter = 0.1, measure = multiclass.au1p)
+plotBMRSummary(bmr_tot, pretty.names = F, pointsize = 4, jitter = 0.2, measure = multiclass.au1p)
 
 
 # Wilcoxon paired test
@@ -167,7 +175,7 @@ data = array(NA, dim = c(length(bmr), 2, 5))
 for(i in 1:length(bmr)) {
   print(i)
   res_aggr = data.frame(getBMRAggrPerformances(bmr[[i]]))
-  data[i,,] = t(data.frame(res_aggr[,c(3,7) ]))
+  data[i,,] = t(data.frame(res_aggr[,c(3,8) ]))
 }
 
 # mmce
@@ -204,11 +212,19 @@ for(i in 2:length(bmr)) {
     resi[[i]][4,6] = max(resi[[i]][4,], na.rm = T)
     resi[[i]][5,6] = max(resi[[i]][5,], na.rm = T)
   }
+  # tuneRF gets the worst results if NA
+  if(is.na(resi[[i]][1,7])) {
+    resi[[i]][1,7] = max(resi[[i]][1,], na.rm = T)
+    resi[[i]][2,7] = min(resi[[i]][2,], na.rm = T)
+    resi[[i]][3,7] = max(resi[[i]][3,], na.rm = T)
+    resi[[i]][4,7] = max(resi[[i]][4,], na.rm = T)
+    resi[[i]][5,7] = max(resi[[i]][5,], na.rm = T)
+  }
   res_aggr = res_aggr + resi[[i]]
   res_aggr_rank = res_aggr_rank + apply(resi[[i]], 1, rank)
 }
 res_aggr = res_aggr/length(bmr)
-lrn.names = c(paste0("tuneRanger", c("MMCE", "AUC", "Brier", "Logloss")), "hyperopt", "caret", "ranger")
+lrn.names = c(paste0("tuneRanger", c("MMCE", "AUC", "Brier", "Logloss")), "hyperopt", "caret", "tuneRF", "ranger")
 colnames(res_aggr) = lrn.names
 library(stringr)
 rownames(res_aggr) = str_sub(rownames(res_aggr), start=1, end=-11)
@@ -260,11 +276,11 @@ for(j in c(1:4)) {
 
 # Compared to ranger model
 perfis = list()
-lrn.names2 = c(paste0("tR", c("MMCE", "AUC", "Brier", "Logloss")), "hyperopt", "caret", "ranger")
+lrn.names2 = c(paste0("tR", c("MMCE", "AUC", "Brier", "Logloss")), "hyperopt", "caret", "tuneRF", "ranger")
 perfi = matrix(NA, length(bmr),  ncol(resi[[1]]))
 for(j in c(1:4)) {
   for(i in 1:30) {
-    perfi[i,] = unlist(resi[[i]][j,]) - unlist(resi[[i]][j,7])
+    perfi[i,] = unlist(resi[[i]][j,]) - unlist(resi[[i]][j,8])
   }
   colnames(perfi) = lrn.names2
   perfis[[j]] = perfi
@@ -282,6 +298,7 @@ op <- par(mfrow = c(2,2),
   oma = c(0,0,0,0) + 0.1,
   mar = c(2,2,1,0) + 0.1)
 
+
 for(i in 1:4) {
   boxplot(perfis[[i]], main = measure.names[i])
   abline(0, 0, col = "red")
@@ -290,6 +307,8 @@ for(i in 1:4) {
   boxplot(perfis[[i]], outline = FALSE, main = measure.names[i])
   abline(0, 0, col = "red")
 }
+
+
 
 
 
