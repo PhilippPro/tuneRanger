@@ -1,7 +1,7 @@
 Package: tuneRanger
 Type: Package
-Title: Tune random forests
-Description: Tuning random forest with one line.
+Title: Tune Random Forest of the 'ranger' package
+Description: Tuning random forest with one line. The package is mainly based on the packages 'ranger' and 'mlrMBO'.
 Version: 0.1
 Authors@R: c(
     person("Philipp", "Probst", email = "philipp_probst@gmx.de", role = c("aut", "cre")),
@@ -11,19 +11,19 @@ Encoding: UTF-8
 Depends:
     R (>= 3.0.2),
     ranger (>= 0.8.0),
+    mlrMBO (>= 1.1.1),
+    parallel (>= 3.3.3),
+    lubridate (>= 1.6.0),
+    lhs (>= 0.14)
+Imports:
     mlr (>= 2.0),
-    mlrMBO (>= 1.1.0),
-    lubridate (>= 1.6.0), 
-    rgenoud (>= 5.7-12.4),
-    parallel (>= 3.3.3), 
+    smoof (>= 1.5.1),
     ParamHelpers (>= 1.11),
     methods (>= 3.3.3),
-    lhs (>= 0.14),
-    smoof (>= 1.5.1),
     BBmisc (>= 1.11)
 LazyData: yes
 ByteCompile: yes
-Date: 2017-06-30
+Date: 2018-01-17
 RoxygenNote: 6.0.1
 Suggests:
     testthat

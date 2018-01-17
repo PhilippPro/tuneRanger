@@ -22,7 +22,7 @@ lrns = list(
   makeLearner("classif.hyperoptRanger", id = "hyperopt", predict.type = "prob"), 
   makeLearner("classif.caretRanger", id = "caret", predict.type = "prob"), 
   makeLearner("classif.tuneRF", id = "tuneRF", predict.type = "prob"), 
-  makeLearner("classif.ranger", id = "ranger", par.vals = list(num.trees = 2000, respect.unordered.factors = TRUE), predict.type = "prob")
+  makeLearner("classif.ranger", id = "ranger", par.vals = list(num.trees = 2000, num.threads = 10), predict.type = "prob")
 )
 
 
@@ -115,6 +115,9 @@ task.ids.bmr3 = task.ids.bmr3[-c(8, 10:13)]
 # 8 datasets
 
 rdesc = makeResampleDesc("CV", iters = 5)
+# Hier evtl. doch ein paar Wiederholungen einbauen, da die Streuung sonst zu groß ist. 
+# Zunächst einfach mal durchlaufen lassen (kann dannach hinzugefügt werden).
+
 for(i in seq_along(task.ids.bmr3)) {
   print(i)
   set.seed(245 + i)

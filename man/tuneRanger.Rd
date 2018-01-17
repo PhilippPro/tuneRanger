@@ -5,8 +5,8 @@
 \title{tuneRanger}
 \usage{
 tuneRanger(task, measure = NULL, iters = 70, iters.warmup = 30,
-  num.threads = NULL, num.trees = 1000, parameters = list(replace = TRUE,
-  respect.unordered.factors = TRUE), tune.parameters = c("mtry",
+  num.threads = NULL, num.trees = 1000, parameters = list(replace = FALSE,
+  respect.unordered.factors = FALSE), tune.parameters = c("mtry",
   "min.node.size", "sample.fraction"), save.file.path = "./optpath.RData",
   build.final.model = TRUE)
 }

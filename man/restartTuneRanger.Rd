@@ -20,6 +20,7 @@ list with recommended parameters and data.frame with all evaluated hyperparamete
 Restarts the tuning process if an error occured.
 }
 \examples{
+\dontrun{
 library(tuneRanger)
 library(mlr)
 
@@ -36,6 +37,5 @@ results = res$results
 results[results$multiclass.brier < quantile(results$multiclass.brier, 0.05),]
 
 # Restart after failing in one of the iterations:
-# res = restartTuneRanger("./optpath.RData", iris.task, measure = list(multiclass.brier))
-
+# res = restartTuneRanger("./optpath.RData", iris.task, measure = list(multiclass.brier))}
 }

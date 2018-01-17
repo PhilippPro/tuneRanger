@@ -5,7 +5,7 @@
 \title{estimateTimeTuneRanger}
 \usage{
 estimateTimeTuneRanger(task, iters = 100, num.threads = 1,
-  num.trees = 1000, respect.unordered.factors = TRUE)
+  num.trees = 1000, respect.unordered.factors = FALSE)
 }
 \arguments{
 \item{task}{The mlr task created by makeClassifTask or makeRegrTask.}

@@ -11,12 +11,12 @@
 #' @export
 #' @examples
 #' estimateTimeTuneRanger(iris.task)
-estimateTimeTuneRanger = function(task, iters = 100, num.threads = 1, num.trees = 1000, respect.unordered.factors = TRUE) {
+estimateTimeTuneRanger = function(task, iters = 100, num.threads = 1, num.trees = 1000, respect.unordered.factors = FALSE) {
   type = getTaskType(task)
   NFeats = getTaskNFeats(task)
   mtry = ceiling(NFeats/2)
   predict.type = ifelse(type == "classif", "prob", "response")
-  par.vals = list(num.trees = num.trees, num.threads = num.threads, respect.unordered.factors = TRUE, replace = TRUE, mtry = mtry)
+  par.vals = list(num.trees = num.trees, num.threads = num.threads, respect.unordered.factors = respect.unordered.factors, replace = FALSE, mtry = mtry)
   lrn = makeLearner(paste0(type, ".ranger"), par.vals = par.vals, predict.type = predict.type)
   time = system.time(mlr::train(lrn, task))[3]
   cat(paste("Approximated time for tuning:", my_seconds_to_period(time * iters + 100)))

@@ -36,11 +36,11 @@ Quickstart:
     # Tuning process (takes around 1 minute); Tuning measure is the multiclass brier score
     res = tuneRanger(iris.task, measure = list(multiclass.brier), num.trees = 1000, 
                  num.threads = 2, iters = 70)
+ 
+    # Mean of best 5 % of the results
     res
-
-    # Best 5 % of the results
-    results = res$results
-    results[results$multiclass.brier < quantile(results$multiclass.brier, 0.05),]
+    # Model with the new tuned hyperparameters
+    res$model
 
     # Restart after failing in one of the iterations:
     res = restartTuneRanger("./optpath.RData", iris.task, measure = list(multiclass.brier))

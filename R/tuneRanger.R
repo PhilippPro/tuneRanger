@@ -17,7 +17,7 @@
 #' @param build.final.model [\code{logical(1)}]\cr
 #'   Should the best found model be fitted on the complete dataset?
 #'   Default is \code{TRUE}. 
-#' @import ranger mlr mlrMBO ParamHelpers BBmisc stats smoof lhs parallel rgenoud
+#' @import ranger mlr mlrMBO ParamHelpers BBmisc stats smoof lhs parallel
 #' @return list with recommended parameters and a data.frame with all evaluated hyperparameters and performance and time results for each run
 #' @details Model based optimization is used as tuning strategy and the three parameters min.node.size, sample.fraction and mtry are tuned at once. Out-of-bag predictions are used for evaluation, which makes it much faster than other packages and tuning strategies that use for example 5-fold cross-validation. Classification as well as regression is supported. 
 #' The measure that should be optimized can be chosen from the list of measures in mlr: http://mlr-org.github.io/mlr-tutorial/devel/html/measures/index.html
@@ -44,7 +44,7 @@
 #' # Model with the new tuned hyperparameters
 #' res$model}
 tuneRanger = function(task, measure = NULL, iters = 70, iters.warmup = 30, num.threads = NULL, num.trees = 1000, 
-  parameters = list(replace = TRUE, respect.unordered.factors = TRUE), 
+  parameters = list(replace = FALSE, respect.unordered.factors = FALSE), 
   tune.parameters = c("mtry", "min.node.size", "sample.fraction"), save.file.path = "./optpath.RData",
   build.final.model = TRUE) {
   
@@ -103,7 +103,6 @@ tuneRanger = function(task, measure = NULL, iters = 70, iters.warmup = 30, num.t
   
   # Budget
   f.evals = iters + iters.warmup
-  
   mbo.init.design.size = iters.warmup
   
   # Focus search
@@ -132,8 +131,8 @@ tuneRanger = function(task, measure = NULL, iters = 70, iters.warmup = 30, num.t
   }
   
   control = makeMBOControl(n.objectives = 1L, propose.points = mbo.prop.points, # impute.y.fun = function(x, y, opt.path) 0.7, 
-    save.on.disk.at = 1:iters, save.file.path = save.file.path)
-  control = setMBOControlTermination(control, max.evals = f.evals, iters = 300)
+    save.on.disk.at = 1:(iters + 1), save.file.path = save.file.path)
+  control = setMBOControlTermination(control, max.evals = f.evals, iters = iters)
   control = setMBOControlInfill(control, #opt = infill.opt,
     opt.focussearch.maxit = mbo.focussearch.maxit,
     opt.focussearch.points = mbo.focussearch.points,
