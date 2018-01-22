@@ -2,10 +2,11 @@
 #' 
 #' Restarts the tuning process if an error occured. 
 #'
-#' @param save.file.path File to which interim results were saved. Default is optpath.RData in the current working 
+#' @param save.file.path File name in the current working directory to which interim results were saved by \code{\link{tuneRanger}}.
 #' @param task The mlr task created by \code{\link[mlr]{makeClassifTask}} or \code{\link[mlr]{makeRegrTask}}. 
 #' @param measure Performance measure that was already used in the original \code{\link{tuneRanger}} process. 
-#' @return list with recommended parameters and data.frame with all evaluated hyperparameters and performance and time results for each run
+#' @return list with recommended parameters and data.frame with all evaluated hyperparameters and performance and time results for each run. 
+#' No model is build.
 #' @export
 #' @examples 
 #' \dontrun{
@@ -15,18 +16,18 @@
 #' # iris is a bit nonsense here
 #' # A mlr task has to be created in order to use the package
 #' # the already existing iris task is used here
-#' unlink("./optpath.RData")
 #' estimateTimeTuneRanger(iris.task)
 #' res = tuneRanger(iris.task, measure = list(multiclass.brier), num.trees = 1000, 
-#'   num.threads = 8, iters = 100)
+#'   num.threads = 8, iters = 70, save.file.path = "optpath.RData")
 #' 
-#' # Best 5 % of the results
-#' results = res$results
-#' results[results$multiclass.brier < quantile(results$multiclass.brier, 0.05),]
+#' # Mean of best 5 % of the results
+#' res
 #' 
 #' # Restart after failing in one of the iterations:
-#' # res = restartTuneRanger("./optpath.RData", iris.task, measure = list(multiclass.brier))}
-restartTuneRanger = function(save.file.path = "./optpath.RData", task, measure = NULL) {
+#' res = restartTuneRanger(save.file.path = "optpath.RData", iris.task, 
+#' measure = list(multiclass.brier))}
+restartTuneRanger = function(save.file.path = "optpath.RData", task, measure = NULL) {
+  
   size = getTaskSize(task)
   res = mboContinue(save.file.path)
   if(!is.null(measure)) {
@@ -46,8 +47,6 @@ restartTuneRanger = function(save.file.path = "./optpath.RData", task, measure =
   recommended.pars = lapply(res[res[, measure.name] < stats::quantile(res[, measure.name], 0.05),], summaryfunction)
   recommended.pars = data.frame(recommended.pars)
   recommended.pars[colnames(res) %in% c("min.node.size", "mtry")] = round(recommended.pars[colnames(res) %in% c("min.node.size", "mtry")])
-  
-  unlink(save.file.path)
   
   out = list(recommended.pars = recommended.pars, results = res)
   class(out) = "tuneRanger"

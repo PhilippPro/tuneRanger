@@ -4,17 +4,18 @@
 \alias{restartTuneRanger}
 \title{restartTuneRanger}
 \usage{
-restartTuneRanger(save.file.path = "./optpath.RData", task, measure = NULL)
+restartTuneRanger(save.file.path = "optpath.RData", task, measure = NULL)
 }
 \arguments{
-\item{save.file.path}{File to which interim results were saved. Default is optpath.RData in the current working}
+\item{save.file.path}{File name in the current working directory to which interim results were saved by \code{\link{tuneRanger}}.}
 
 \item{task}{The mlr task created by \code{\link[mlr]{makeClassifTask}} or \code{\link[mlr]{makeRegrTask}}.}
 
 \item{measure}{Performance measure that was already used in the original \code{\link{tuneRanger}} process.}
 }
 \value{
-list with recommended parameters and data.frame with all evaluated hyperparameters and performance and time results for each run
+list with recommended parameters and data.frame with all evaluated hyperparameters and performance and time results for each run. 
+No model is build.
 }
 \description{
 Restarts the tuning process if an error occured.
@@ -27,15 +28,14 @@ library(mlr)
 # iris is a bit nonsense here
 # A mlr task has to be created in order to use the package
 # the already existing iris task is used here
-unlink("./optpath.RData")
 estimateTimeTuneRanger(iris.task)
 res = tuneRanger(iris.task, measure = list(multiclass.brier), num.trees = 1000, 
-  num.threads = 8, iters = 100)
+  num.threads = 8, iters = 70, save.file.path = "optpath.RData")
 
-# Best 5 \% of the results
-results = res$results
-results[results$multiclass.brier < quantile(results$multiclass.brier, 0.05),]
+# Mean of best 5 \% of the results
+res
 
 # Restart after failing in one of the iterations:
-# res = restartTuneRanger("./optpath.RData", iris.task, measure = list(multiclass.brier))}
+res = restartTuneRanger(save.file.path = "optpath.RData", iris.task, 
+measure = list(multiclass.brier))}
 }

@@ -7,7 +7,7 @@
 tuneRanger(task, measure = NULL, iters = 70, iters.warmup = 30,
   num.threads = NULL, num.trees = 1000, parameters = list(replace = FALSE,
   respect.unordered.factors = FALSE), tune.parameters = c("mtry",
-  "min.node.size", "sample.fraction"), save.file.path = "./optpath.RData",
+  "min.node.size", "sample.fraction"), save.file.path = NULL,
   build.final.model = TRUE)
 }
 \arguments{
@@ -29,8 +29,9 @@ tuneRanger(task, measure = NULL, iters = 70, iters.warmup = 30,
 Default is mtry, min.node.size and sample.fraction. Additionally replace and respect.unordered.factors can be 
 included in the tuning process.}
 
-\item{save.file.path}{File to which interim results are saved. Default is optpath.RData in the current working 
-directory. If one iteration fails the algorithm can be started again with \code{\link{restartTuneRanger}}.}
+\item{save.file.path}{File to which interim results are saved (e.g. "optpath.RData") in the current working directory. 
+Default is NULL, which does not save the results. If a file was specified and one iteration fails the algorithm can be 
+started again with \code{\link{restartTuneRanger}}.}
 
 \item{build.final.model}{[\code{logical(1)}]\cr
 Should the best found model be fitted on the complete dataset?
@@ -54,13 +55,12 @@ library(mlr)
 # A mlr task has to be created in order to use the package
 data(iris)
 iris.task = makeClassifTask(data = iris, target = "Species")
-unlink("./optpath.RData")
-
+ 
 # Estimate runtime
 estimateTimeTuneRanger(iris.task)
 # Tuning
 res = tuneRanger(iris.task, measure = list(multiclass.brier), num.trees = 1000, 
-  num.threads = 2, iters = 70)
+  num.threads = 2, iters = 70, save.file.path = NULL)
   
 # Mean of best 5 \% of the results
 res

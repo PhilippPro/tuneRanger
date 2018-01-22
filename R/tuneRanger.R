@@ -12,12 +12,14 @@
 #' @param tune.parameters Optional character vector of parameters that should be tuned. 
 #' Default is mtry, min.node.size and sample.fraction. Additionally replace and respect.unordered.factors can be 
 #' included in the tuning process.
-#' @param save.file.path File to which interim results are saved. Default is optpath.RData in the current working 
-#' directory. If one iteration fails the algorithm can be started again with \code{\link{restartTuneRanger}}.
+#' @param save.file.path File to which interim results are saved (e.g. "optpath.RData") in the current working directory. 
+#' Default is NULL, which does not save the results. If a file was specified and one iteration fails the algorithm can be 
+#' started again with \code{\link{restartTuneRanger}}.
 #' @param build.final.model [\code{logical(1)}]\cr
 #'   Should the best found model be fitted on the complete dataset?
 #'   Default is \code{TRUE}. 
 #' @import ranger mlr mlrMBO ParamHelpers BBmisc stats smoof lhs parallel
+#' @importFrom DiceKriging km predict.km
 #' @return list with recommended parameters and a data.frame with all evaluated hyperparameters and performance and time results for each run
 #' @details Model based optimization is used as tuning strategy and the three parameters min.node.size, sample.fraction and mtry are tuned at once. Out-of-bag predictions are used for evaluation, which makes it much faster than other packages and tuning strategies that use for example 5-fold cross-validation. Classification as well as regression is supported. 
 #' The measure that should be optimized can be chosen from the list of measures in mlr: http://mlr-org.github.io/mlr-tutorial/devel/html/measures/index.html
@@ -31,13 +33,12 @@
 #' # A mlr task has to be created in order to use the package
 #' data(iris)
 #' iris.task = makeClassifTask(data = iris, target = "Species")
-#' unlink("./optpath.RData")
-#' 
+#'  
 #' # Estimate runtime
 #' estimateTimeTuneRanger(iris.task)
 #' # Tuning
 #' res = tuneRanger(iris.task, measure = list(multiclass.brier), num.trees = 1000, 
-#'   num.threads = 2, iters = 70)
+#'   num.threads = 2, iters = 70, save.file.path = NULL)
 #'   
 #' # Mean of best 5 % of the results
 #' res
@@ -45,10 +46,14 @@
 #' res$model}
 tuneRanger = function(task, measure = NULL, iters = 70, iters.warmup = 30, num.threads = NULL, num.trees = 1000, 
   parameters = list(replace = FALSE, respect.unordered.factors = FALSE), 
-  tune.parameters = c("mtry", "min.node.size", "sample.fraction"), save.file.path = "./optpath.RData",
+  tune.parameters = c("mtry", "min.node.size", "sample.fraction"), save.file.path = NULL,
   build.final.model = TRUE) {
   
-  unlink(save.file.path)
+  if(is.null(save.file.path)) {
+    save.on.disk.at = NULL
+  } else {
+    save.on.disk.at = 1:(iters + 1)
+  }
   
   fixed.param.in.tune = names(parameters) %in% tune.parameters
   if(any(fixed.param.in.tune))
@@ -131,7 +136,7 @@ tuneRanger = function(task, measure = NULL, iters = 70, iters.warmup = 30, num.t
   }
   
   control = makeMBOControl(n.objectives = 1L, propose.points = mbo.prop.points, # impute.y.fun = function(x, y, opt.path) 0.7, 
-    save.on.disk.at = 1:(iters + 1), save.file.path = save.file.path)
+    save.on.disk.at = save.on.disk.at, save.file.path = save.file.path)
   control = setMBOControlTermination(control, max.evals = f.evals, iters = iters)
   control = setMBOControlInfill(control, #opt = infill.opt,
     opt.focussearch.maxit = mbo.focussearch.maxit,
@@ -169,8 +174,6 @@ tuneRanger = function(task, measure = NULL, iters = 70, iters.warmup = 30, num.t
   } else {
     NULL
   }
-  
-  unlink(save.file.path)
   
   out = list(recommended.pars = recommended.pars, results = res, model = mod)
   class(out) = "tuneRanger"

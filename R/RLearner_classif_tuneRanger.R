@@ -1,5 +1,4 @@
-
-# Finally make more parameters possible. This is just a test version.
+#' @export
 makeRLearner.classif.tuneRanger = function() {
   makeRLearnerClassif(
     cl = "classif.tuneRanger",
@@ -11,21 +10,19 @@ makeRLearner.classif.tuneRanger = function() {
       makeIntegerLearnerParam(id = "num.threads", lower = 1L, when = "both", tunable = FALSE),
       makeIntegerLearnerParam(id = "num.trees", lower = 1L, default = 500L)
     ),
-    properties = c("twoclass", "multiclass", "prob", "numerics", "factors", "ordered", "featimp", "weights", "oobpreds"),
+    properties = c("twoclass", "multiclass", "prob", "numerics", "factors", "ordered", "weights"),
     name = "Random Forests",
     short.name = "tuneRanger",
-    note = "By default, internal parallelization is switched off (`num.threads = 1`), `verbose` output is disabled, `respect.unordered.factors` is set to `TRUE`. All settings are changeable.",
-    callees = "tuneRanger"
+    note = "By default, internal parallelization is switched off (`num.threads = 1`), `verbose` output is disabled, `respect.unordered.factors` is set to `TRUE`. All settings are changeable."
   )
 }
 
-# task, measure = NULL, iters = 100, num.threads = NULL, num.trees = 1000, 
-# parameters = list(replace = TRUE, respect.unordered.factors = TRUE
-
+#' @export
 trainLearner.classif.tuneRanger = function(.learner, .task, .subset, .weights = NULL, ...) {
   tuneRanger::tuneRanger(task = subsetTask(.task, .subset), build.final.model = TRUE, ...)$model
 }
 
+#' @export
 predictLearner.classif.tuneRanger = function(.learner, .model, .newdata, ...) {
   model = .model$learner.model$learner.model
   p = predict(object = model, data = .newdata, ...)
