@@ -45,7 +45,7 @@
 #' # Model with the new tuned hyperparameters
 #' res$model}
 tuneRanger = function(task, measure = NULL, iters = 70, iters.warmup = 30, num.threads = NULL, num.trees = 1000, 
-  parameters = list(replace = FALSE, respect.unordered.factors = FALSE), 
+  parameters = list(replace = FALSE, respect.unordered.factors = "order"), 
   tune.parameters = c("mtry", "min.node.size", "sample.fraction"), save.file.path = NULL,
   build.final.model = TRUE) {
   
@@ -99,9 +99,9 @@ tuneRanger = function(task, measure = NULL, iters = 70, iters.warmup = 30, num.t
   ps = makeParamSet(
     makeIntegerParam("mtry", lower = 1, upper = NFeats),
     makeNumericParam("min.node.size", lower = 0, upper = 1, trafo = trafo_nodesize), 
-    makeNumericParam("sample.fraction", lower = 0.22, upper = 1),
-    makeLogicalParam(id = "replace", default = TRUE),
-    makeLogicalParam(id = "respect.unordered.factors", default = FALSE)
+    makeNumericParam("sample.fraction", lower = 0.2, upper = 0.8),
+    makeLogicalParam(id = "replace", default = FALSE),
+    makeDiscreteLearnerParam("respect.unordered.factors", values = c("ignore", "order", "partition", TRUE, FALSE), default = "order")
   )
   tunable.parameters = c("mtry", "min.node.size", "sample.fraction", "replace", "respect.unordered.factors")
   ps$pars = ps$pars[tunable.parameters %in% tune.parameters]

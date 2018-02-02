@@ -19,23 +19,31 @@ lrns = list(
     par.vals = list(num.trees = 2000, num.threads = 10, measure = list(multiclass.brier))), 
   makeLearner("classif.tuneRanger", id = "tuneRFLogloss", predict.type = "prob", 
     par.vals = list(num.trees = 2000, num.threads = 10, measure = list(logloss))), 
+  makeLearner("classif.tuneRanger", id = "tuneRFMMCE_mtry", predict.type = "prob", 
+    par.vals = list(num.trees = 2000, num.threads = 10, measure = list(mmce), tune.parameters = "mtry")),
+  makeLearner("classif.tuneRanger", id = "tuneRFAUC_mtry", predict.type = "prob", 
+    par.vals = list(num.trees = 2000, num.threads = 10, measure = list(multiclass.au1p), tune.parameters = "mtry")),
+  makeLearner("classif.tuneRanger", id = "tuneRFBrier_mtry", predict.type = "prob", 
+    par.vals = list(num.trees = 2000, num.threads = 10, measure = list(multiclass.brier), tune.parameters = "mtry")),
+  makeLearner("classif.tuneRanger", id = "tuneRFLogloss_mtry", predict.type = "prob", 
+    par.vals = list(num.trees = 2000, num.threads = 10, measure = list(logloss), tune.parameters = "mtry")),
   makeLearner("classif.hyperoptRanger", id = "hyperopt", predict.type = "prob"), 
   makeLearner("classif.caretRanger", id = "caret", predict.type = "prob"), 
   makeLearner("classif.tuneRF", id = "tuneRF", predict.type = "prob"), 
-  makeLearner("classif.ranger", id = "ranger", par.vals = list(num.trees = 2000, num.threads = 10), predict.type = "prob")
+  makeLearner("classif.ranger", id = "ranger", par.vals = list(num.trees = 2000, num.threads = 10, respect.unordered.factor = "order"), predict.type = "prob")
 )
 
-
-
-rdesc = makeResampleDesc("CV", iters = 2)
+rdesc = makeResampleDesc("CV", iters = 5)
 measures = list(mmce, multiclass.au1p, multiclass.brier, logloss, timetrain)
 configureMlr(on.learner.error = "warn")
-set.seed(123)
+set.seed(126)
 bmr1 = benchmark(lrns, iris.task, rdesc, measures)
 
 library(OpenML)
 task.ids = listOMLTasks(number.of.classes = 2L, number.of.missing.values = 0, data.tag = "OpenML100", estimation.procedure = "10-fold Crossvalidation")$task.id
 task.ids = task.ids[-47] # does not work
+tasks = listOMLTasks(number.of.classes = 2L, number.of.missing.values = 0, data.tag = "OpenML100", estimation.procedure = "10-fold Crossvalidation")
+
 # time estimation
 time.estimate = list()
 for(i in seq_along(task.ids)) {
@@ -120,7 +128,8 @@ rdesc = makeResampleDesc("CV", iters = 5)
 
 for(i in seq_along(task.ids.bmr3)) {
   print(i)
-  set.seed(245 + i)
+  # set.seed(245 + i) # 1. Durchlauf
+  set.seed(345) # 2. Durchlauf
   task = getOMLTask(task.ids.bmr3[i])
   task = convertOMLTaskToMlr(task)$mlr.task
   bmr[[length(bmr) + 1]] = benchmark(lrns, task, rdesc, measures, keep.pred = FALSE, models = FALSE)
@@ -137,6 +146,16 @@ for(i in seq_along(task.ids.bmr4)) {
   namen[i] = task$input$data.set$desc$name
 }
 task.ids.bmr4 = task.ids.bmr4[-c(5:9)]
+
+for(i in seq_along(task.ids.bmr4)) {
+  print(i)
+  set.seed(245 + i)
+  task = getOMLTask(task.ids.bmr4[i])
+  task = convertOMLTaskToMlr(task)$mlr.task
+  bmr[[length(bmr) + 1]] = benchmark(lrns, task, rdesc, measures, keep.pred = FALSE, models = FALSE)
+  save(bmr, file = "./benchmark/bmr.RData")
+}
+
 load("./benchmark/bmr.RData")
 
 # Analysis
@@ -287,7 +306,7 @@ for(j in c(1:4)) {
   }
   colnames(perfi) = lrn.names2
   perfis[[j]] = perfi
-
+  
   #perfi = perfi[time_order,]
   #perfi = perfi[order(perfi[,1]),]
   print(plot(perfi[,1], type = "l", ylim = c(min(perfi, na.rm = T), max(perfi, na.rm = T)), ylab = rownames(res_aggr)[j], xlab = "Dataset number"))
@@ -310,12 +329,6 @@ for(i in 1:4) {
   boxplot(perfis[[i]], outline = FALSE, main = measure.names[i])
   abline(0, 0, col = "red")
 }
-
-
-
-
-
-
 
 
 

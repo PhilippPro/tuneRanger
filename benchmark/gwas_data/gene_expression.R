@@ -50,8 +50,12 @@ lrns = list(
   makeLearner("classif.ranger", id = "ranger", par.vals = list(num.trees = 2000, num.threads = 10), predict.type = "prob")
 )
 
-rdesc = makeResampleDesc("RepCV", reps = 10, folds = 5)
+rdesc = makeResampleDesc("RepCV", reps = 20, folds = 5)
 measures = list(mmce, multiclass.au1p, multiclass.brier, logloss, timetrain)
+
+bam = benchmark(lrns, breast.task, rdesc, measures)
+bam2 = benchmark(lrns, breast.task, rdesc, measures, keep.pred = FALSE, models = FALSE)
+bam3 = benchmark(lrns, leukemia.task, rdesc, measures, keep.pred = FALSE, models = FALSE)
 
 bmr_gene = list()
 bmr_gene[[1]] = benchmark(lrns, breast.task, rdesc, measures)

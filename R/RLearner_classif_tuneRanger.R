@@ -8,8 +8,10 @@ makeRLearner.classif.tuneRanger = function() {
       makeIntegerLearnerParam(id = "iters", lower = 1L, default = 70L),
       makeIntegerLearnerParam(id = "iters.warmup", lower = 1L, default = 30L),
       makeIntegerLearnerParam(id = "num.threads", lower = 1L, when = "both", tunable = FALSE),
-      makeIntegerLearnerParam(id = "num.trees", lower = 1L, default = 500L)
-    ),
+      makeIntegerLearnerParam(id = "num.trees", lower = 1L, default = 500L),
+      makeUntypedLearnerParam(id = "tune.parameters", default = c("mtry", "min.node.size", "sample.fraction")),
+      makeUntypedLearnerParam(id = "parameters", default = list(replace = FALSE, respect.unordered.factors = TRUE))
+      ),
     properties = c("twoclass", "multiclass", "prob", "numerics", "factors", "ordered", "weights"),
     name = "Random Forests",
     short.name = "tuneRanger",
