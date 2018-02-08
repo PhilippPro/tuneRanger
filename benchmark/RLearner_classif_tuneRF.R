@@ -7,7 +7,7 @@ makeRLearner.classif.tuneRF = function() {
     properties = c("twoclass", "multiclass", "prob", "numerics", "factors", "ordered", "featimp", "weights"),
     name = "tuneRF of random forest",
     short.name = "tuneRF",
-    note = "",
+    note = ""
   )
 }
 

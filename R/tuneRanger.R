@@ -88,7 +88,7 @@ tuneRanger = function(task, measure = NULL, iters = 70, iters.warmup = 30, num.t
   performan = function(x) {
     par.vals = c(x, num.trees = num.trees, num.threads = num.threads, parameters)
     lrn = makeLearner(paste0(type, ".ranger"), par.vals = par.vals, predict.type = predict.type)
-    mod = mlr::train(lrn, task)
+    mod = catchOrderWarning(mlr::train(lrn, task))
     preds = getOOBPreds(mod, task)
     performance(preds, measures = measure)
   }
@@ -99,9 +99,9 @@ tuneRanger = function(task, measure = NULL, iters = 70, iters.warmup = 30, num.t
   ps = makeParamSet(
     makeIntegerParam("mtry", lower = 1, upper = NFeats),
     makeNumericParam("min.node.size", lower = 0, upper = 1, trafo = trafo_nodesize), 
-    makeNumericParam("sample.fraction", lower = 0.2, upper = 0.8),
+    makeNumericParam("sample.fraction", lower = 0.2, upper = 0.9),
     makeLogicalParam(id = "replace", default = FALSE),
-    makeDiscreteLearnerParam("respect.unordered.factors", values = c("ignore", "order", "partition", TRUE, FALSE), default = "order")
+    makeDiscreteLearnerParam("respect.unordered.factors", values = c("ignore", "order", "partition"), default = "order")
   )
   tunable.parameters = c("mtry", "min.node.size", "sample.fraction", "replace", "respect.unordered.factors")
   ps$pars = ps$pars[tunable.parameters %in% tune.parameters]
@@ -170,7 +170,7 @@ tuneRanger = function(task, measure = NULL, iters = 70, iters.warmup = 30, num.t
     x = as.list(recommended.pars[-c(ln.rec.pars - 1, ln.rec.pars)])
     x = c(x, num.trees = num.trees, num.threads = num.threads, parameters)
     lrn = mlr::makeLearner(paste0(type, ".ranger"), par.vals = x, predict.type = predict.type)
-    mlr::train(lrn, task)
+    catchOrderWarning(mlr::train(lrn, task))
   } else {
     NULL
   }
@@ -193,3 +193,11 @@ trafo_nodesize_end = function(x, size) ceiling(2^(log(size * 0.2, 2) * x))
 
 summaryfunction = function(x) ifelse(class(x) %in% c("numeric", "integer"), mean(x), 
   names(sort(table(x), decreasing = TRUE)[1]))
+
+catchOrderWarning = function(code) {
+withCallingHandlers(code,
+  warning = function(w) {
+    if (grepl("Warning: The 'order' mode for unordered factor handling for multiclass classification is experimental.", w$message))
+      invokeRestart("muffleWarning")
+})
+}

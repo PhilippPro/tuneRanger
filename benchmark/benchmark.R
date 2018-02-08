@@ -30,7 +30,7 @@ lrns = list(
   makeLearner("classif.hyperoptRanger", id = "hyperopt", predict.type = "prob"), 
   makeLearner("classif.caretRanger", id = "caret", predict.type = "prob"), 
   makeLearner("classif.tuneRF", id = "tuneRF", predict.type = "prob"), 
-  makeLearner("classif.ranger", id = "ranger", par.vals = list(num.trees = 2000, num.threads = 10, respect.unordered.factor = "order"), predict.type = "prob")
+  makeLearner("classif.ranger", id = "ranger", par.vals = list(num.trees = 2000, num.threads = 10, respect.unordered.factors = "order"), predict.type = "prob")
 )
 
 rdesc = makeResampleDesc("CV", iters = 5)
@@ -40,9 +40,9 @@ set.seed(126)
 bmr1 = benchmark(lrns, iris.task, rdesc, measures)
 
 library(OpenML)
-task.ids = listOMLTasks(number.of.classes = 2L, number.of.missing.values = 0, data.tag = "OpenML100", estimation.procedure = "10-fold Crossvalidation")$task.id
-task.ids = task.ids[-47] # does not work
-tasks = listOMLTasks(number.of.classes = 2L, number.of.missing.values = 0, data.tag = "OpenML100", estimation.procedure = "10-fold Crossvalidation")
+task.ids = listOMLTasks(number.of.classes = 2L, number.of.missing.values = 0, tag = "OpenML100", estimation.procedure = "10-fold Crossvalidation")$task.id
+save(task.ids, file = "./benchmark/task_ids.RData")
+tasks = listOMLTasks(number.of.classes = 2L, number.of.missing.values = 0, tag = "OpenML100", estimation.procedure = "10-fold Crossvalidation")
 
 # time estimation
 time.estimate = list()
@@ -50,7 +50,7 @@ for(i in seq_along(task.ids)) {
   print(i)
   task = getOMLTask(task.ids[i])
   task = convertOMLTaskToMlr(task)$mlr.task
-  time.estimate[[i]] = estimateTuneRFTime(task, num.threads = 10, num.trees = 1000)
+  time.estimate[[i]] = estimateTimeTuneRanger(task, num.threads = 10, num.trees = 2000)
   print(time.estimate[[i]])
   save(time.estimate, file = "./benchmark/time.estimate.RData")
 }
@@ -61,26 +61,18 @@ measures = list(mmce, multiclass.au1p, multiclass.brier, logloss, timetrain)
 bmr = list()
 configureMlr(on.learner.error = "warn")
 
-# Choose 5 (10) small, 5 medium and 5 big datasets
+# Choose small and big datasets
 # select datasets where RF do not take longer than ...
-set.seed(127)
-# task.ids.bmr = task.ids[sample(which(time.estimate<3600), 20)]
+
 # take only small ones first; afterwards some bigger datasets
 task.ids.bmr = task.ids[which((unlist(time.estimate)-100)<60)]
 cbind(time.estimate, (unlist(time.estimate)-100)<60)
 
-namen = numeric(30)
-for(i in seq_along(task.ids.bmr)) {
-  print(i)
-  task = getOMLTask(task.ids.bmr[i])
-  namen[i] = task$input$data.set$desc$name
-}
-# each dataset only once
-task.ids.bmr = task.ids.bmr[-c(19, 20, 22:30)]
+tasks[which((unlist(time.estimate)-100)<60),]
 
-for(i in seq_along(task.ids.bmr)) { # 19 datasets
+for(i in seq_along(task.ids.bmr)) { # 13 datasets
   print(i)
-  set.seed(145 + i)
+  set.seed(200 + i)
   task = getOMLTask(task.ids.bmr[i])
   task = convertOMLTaskToMlr(task)$mlr.task
   bmr[[i]] = benchmark(lrns, task, rdesc, measures, keep.pred = FALSE, models = FALSE)
@@ -92,18 +84,11 @@ load("./benchmark/bmr.RData")
 # medium datasets (between 160 seconds and 10 minutes)
 task.ids.bmr2 = task.ids[which((unlist(time.estimate)-100)>60 & (unlist(time.estimate))<600)]
 unlist(time.estimate)[which((unlist(time.estimate)-100)>60 & (unlist(time.estimate))<600 )]
-namen = numeric(length(task.ids.bmr2))
-for(i in seq_along(task.ids.bmr2)) {
-  print(i)
-  task = getOMLTask(task.ids.bmr2[i])
-  namen[i] = task$input$data.set$desc$name
-}
-task.ids.bmr2 = task.ids.bmr2[-c(8, 13:18)]
-# 11 datasets
 
+# 13 datasets
 for(i in seq_along(task.ids.bmr2)) {
   print(i)
-  set.seed(145 + i)
+  set.seed(200 + i)
   task = getOMLTask(task.ids.bmr2[i])
   task = convertOMLTaskToMlr(task)$mlr.task
   bmr[[length(bmr) + 1]] = benchmark(lrns, task, rdesc, measures, keep.pred = FALSE, models = FALSE)
@@ -113,19 +98,11 @@ load("./benchmark/bmr.RData")
 
 # big datasets (between 10 minutes and 1 hour)
 task.ids.bmr3 = task.ids[which((unlist(time.estimate))>600 & (unlist(time.estimate))<3600)]
-namen = numeric(length(task.ids.bmr3))
-for(i in seq_along(task.ids.bmr3)) {
-  print(i)
-  task = getOMLTask(task.ids.bmr3[i])
-  namen[i] = task$input$data.set$desc$name
-}
-task.ids.bmr3 = task.ids.bmr3[-c(8, 10:13)]
-# 8 datasets
+# 9 datasets
 
 rdesc = makeResampleDesc("CV", iters = 5)
 # Hier evtl. doch ein paar Wiederholungen einbauen, da die Streuung sonst zu groß ist. 
 # Zunächst einfach mal durchlaufen lassen (kann dannach hinzugefügt werden).
-
 for(i in seq_along(task.ids.bmr3)) {
   print(i)
   # set.seed(245 + i) # 1. Durchlauf
@@ -137,26 +114,8 @@ for(i in seq_along(task.ids.bmr3)) {
 }
 load("./benchmark/bmr.RData")
 
-# Very big datasets
+# Very big datasets, 4 datasets
 task.ids.bmr4 = task.ids[which((unlist(time.estimate))>=3600)]
-namen = numeric(length(task.ids.bmr4))
-for(i in seq_along(task.ids.bmr4)) {
-  print(i)
-  task = getOMLTask(task.ids.bmr4[i])
-  namen[i] = task$input$data.set$desc$name
-}
-task.ids.bmr4 = task.ids.bmr4[-c(5:9)]
-
-for(i in seq_along(task.ids.bmr4)) {
-  print(i)
-  set.seed(245 + i)
-  task = getOMLTask(task.ids.bmr4[i])
-  task = convertOMLTaskToMlr(task)$mlr.task
-  bmr[[length(bmr) + 1]] = benchmark(lrns, task, rdesc, measures, keep.pred = FALSE, models = FALSE)
-  save(bmr, file = "./benchmark/bmr.RData")
-}
-
-load("./benchmark/bmr.RData")
 
 # Analysis
 
@@ -331,36 +290,55 @@ for(i in 1:4) {
 }
 
 
-
-
-
-
-# Anhang
 # regression
 
-# very big (more than one hour (up to 4 hours))
-task.ids.bmr4 = task.ids[which((unlist(time.estimate))>3600)]
-unlist(time.estimate)[which((unlist(time.estimate))>3600)]
-namen = numeric(length(task.ids.bmr4))
-for(i in seq_along(task.ids.bmr4)) {
-  print(i)
-  set.seed(345 + i)
-  task = getOMLTask(task.ids.bmr4[i])
-  namen[i] = task$input$data.set$desc$name
-}
-task.ids.bmr4 = task.ids.bmr4[-c(5:9)]
-# 4 datasets
+library(devtools)
+load_all("../tuneRanger")
 
-rdesc = makeResampleDesc("RepCV", reps = 1, folds = 5)
-for(i in seq_along(task.ids.bmr4)) {
+# Compare runtime and AUC/Brier Score with mlr
+library(mlr)
+
+source("./benchmark/RLearner_regr_caretRanger.R")
+library(mlrHyperopt)
+source("./benchmark/RLearner_regr_hyperoptRanger.R")
+library(randomForest)
+source("./benchmark/RLearner_regr_tuneRF.R")
+
+lrns = list(
+  makeLearner("regr.tuneRanger", id = "tuneRFMSE", 
+    par.vals = list(num.trees = 2000, num.threads = 10, measure = list(mse))),
+  makeLearner("regr.tuneRanger", id = "tuneRFMSE_mtry", 
+    par.vals = list(num.trees = 2000, num.threads = 10, measure = list(mse), tune.parameters = "mtry")),
+  makeLearner("regr.hyperoptRanger", id = "hyperopt"), 
+  makeLearner("regr.caretRanger", id = "caret"), 
+  makeLearner("regr.tuneRF", id = "tuneRF"), 
+  makeLearner("regr.ranger", id = "ranger", par.vals = list(num.trees = 2000, num.threads = 10, respect.unordered.factors = "order"))
+)
+
+
+load("./benchmark/regression/regression_datasets_manual.RData")
+reg = reg[reg$number.of.instances >= 500, ]
+# 38 datasets
+reg$number.of.features
+task.ids.regr = reg$task.id
+
+rdesc = makeResampleDesc("RepCV", reps = 2, folds = 5)
+measures = list(mse, mae, medse, medae, rsq, kendalltau, spearmanrho, timetrain)
+configureMlr(on.learner.error = "warn")
+
+rdesc = makeResampleDesc("Holdout")
+
+namen = numeric(30)
+for(i in seq_along(task.ids.regr)[-1]) { # 38 datasets
   print(i)
-  set.seed(145 + i)
-  task = getOMLTask(task.ids.bmr4[i])
+  set.seed(200 + i)
+  task = getOMLTask(task.ids.regr[i])
   task = convertOMLTaskToMlr(task)$mlr.task
-  bmr[[length(bmr) + 1]] = benchmark(lrns, task, rdesc, measures, keep.pred = FALSE, models = FALSE)
-  save(bmr, file = "./benchmark/bmr.RData")
+  bmr_regr = benchmark(lrns, task, rdesc, measures, keep.pred = FALSE, models = FALSE)
+  save(bmr_regr, file = "./benchmark/bmr_regr.RData")
 }
-load("./benchmark/bmr.RData")
+bmr_regr
+# Anhang
 
-# save task.id vectors...
-# small datasets have very volatile estimation of the error rate/AUC; that's why tuneRF is sometimes worse.
+
+

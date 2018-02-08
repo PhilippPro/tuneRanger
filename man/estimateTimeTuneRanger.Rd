@@ -5,7 +5,7 @@
 \title{estimateTimeTuneRanger}
 \usage{
 estimateTimeTuneRanger(task, iters = 100, num.threads = 1,
-  num.trees = 1000, respect.unordered.factors = FALSE)
+  num.trees = 1000, respect.unordered.factors = "order")
 }
 \arguments{
 \item{task}{The mlr task created by makeClassifTask or makeRegrTask.}
@@ -16,7 +16,7 @@ estimateTimeTuneRanger(task, iters = 100, num.threads = 1,
 
 \item{num.trees}{Number of trees.}
 
-\item{respect.unordered.factors}{Handling of unordered factor covariates. One of 'ignore', 'order' and 'partition'. For the "extratrees" splitrule the default is "partition" for all other splitrules 'ignore'. Alternatively TRUE (='order') or FALSE (='ignore') can be used. See below for details.}
+\item{respect.unordered.factors}{Handling of unordered factor covariates. One of 'ignore', 'order' and 'partition'. 'order' is the default.}
 }
 \value{
 estimated time for the tuning procedure

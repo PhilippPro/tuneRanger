@@ -29,13 +29,15 @@ library(mlr)
 # A mlr task has to be created in order to use the package
 # the already existing iris task is used here
 estimateTimeTuneRanger(iris.task)
+# temporarily file name to save results
+path = tempfile()
 res = tuneRanger(iris.task, measure = list(multiclass.brier), num.trees = 1000, 
-  num.threads = 8, iters = 70, save.file.path = "optpath.RData")
+  num.threads = 8, iters = 70, save.file.path = path)
 
 # Mean of best 5 \% of the results
 res
 
 # Restart after failing in one of the iterations:
-res = restartTuneRanger(save.file.path = "optpath.RData", iris.task, 
+res = restartTuneRanger(save.file.path = path, iris.task, 
 measure = list(multiclass.brier))}
 }

@@ -4,21 +4,23 @@
 #' @param iters Number of iterations. 
 #' @param num.threads Number of threads. Default is 1.
 #' @param num.trees Number of trees.
-#' @param respect.unordered.factors Handling of unordered factor covariates. One of 'ignore', 'order' and 'partition'. For the "extratrees" splitrule the default is "partition" for all other splitrules 'ignore'. Alternatively TRUE (='order') or FALSE (='ignore') can be used. See below for details.
+#' @param respect.unordered.factors Handling of unordered factor covariates. One of 'ignore', 'order' and 'partition'. 'order' is the default.
 #' @return estimated time for the tuning procedure
 #' @importFrom methods slot<-
 #' @importFrom lubridate period
 #' @export
 #' @examples
 #' estimateTimeTuneRanger(iris.task)
-estimateTimeTuneRanger = function(task, iters = 100, num.threads = 1, num.trees = 1000, respect.unordered.factors = FALSE) {
+estimateTimeTuneRanger = function(task, iters = 100, num.threads = 1, num.trees = 1000, respect.unordered.factors = "order") {
   type = getTaskType(task)
   NFeats = getTaskNFeats(task)
   mtry = ceiling(NFeats/2)
   predict.type = ifelse(type == "classif", "prob", "response")
   par.vals = list(num.trees = num.trees, num.threads = num.threads, respect.unordered.factors = respect.unordered.factors, replace = FALSE, mtry = mtry)
   lrn = makeLearner(paste0(type, ".ranger"), par.vals = par.vals, predict.type = predict.type)
-  time = system.time(mlr::train(lrn, task))[3]
+    # Train model and avoid the nasty error message from ranger
+  time =  system.time(mod <- catchOrderWarning(mlr::train(lrn, task)))[3]
+  
   cat(paste("Approximated time for tuning:", my_seconds_to_period(time * iters + 100)))
   invisible(time*iters + 100)
 }
@@ -36,3 +38,5 @@ my_seconds_to_period = function(x) {
   slot(newper, ".Data") <- round(remainder%%(60),0)
   newper * sign(span)
 }
+
+

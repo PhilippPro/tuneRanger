@@ -6,7 +6,7 @@
 \usage{
 tuneRanger(task, measure = NULL, iters = 70, iters.warmup = 30,
   num.threads = NULL, num.trees = 1000, parameters = list(replace = FALSE,
-  respect.unordered.factors = FALSE), tune.parameters = c("mtry",
+  respect.unordered.factors = "order"), tune.parameters = c("mtry",
   "min.node.size", "sample.fraction"), save.file.path = NULL,
   build.final.model = TRUE)
 }

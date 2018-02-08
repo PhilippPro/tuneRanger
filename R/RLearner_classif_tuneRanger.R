@@ -10,12 +10,12 @@ makeRLearner.classif.tuneRanger = function() {
       makeIntegerLearnerParam(id = "num.threads", lower = 1L, when = "both", tunable = FALSE),
       makeIntegerLearnerParam(id = "num.trees", lower = 1L, default = 500L),
       makeUntypedLearnerParam(id = "tune.parameters", default = c("mtry", "min.node.size", "sample.fraction")),
-      makeUntypedLearnerParam(id = "parameters", default = list(replace = FALSE, respect.unordered.factors = TRUE))
+      makeUntypedLearnerParam(id = "parameters", default = list(replace = FALSE, respect.unordered.factors = "order"))
       ),
     properties = c("twoclass", "multiclass", "prob", "numerics", "factors", "ordered", "weights"),
     name = "Random Forests",
     short.name = "tuneRanger",
-    note = "By default, internal parallelization is switched off (`num.threads = 1`), `verbose` output is disabled, `respect.unordered.factors` is set to `TRUE`. All settings are changeable."
+    note = "By default, internal parallelization is switched off (`num.threads = 1`), `verbose` output is disabled, `respect.unordered.factors` is set to `order`. All settings are changeable."
   )
 }
 
