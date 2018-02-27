@@ -11,7 +11,7 @@ library(randomForest)
 source("./benchmark/RLearner_classif_tuneRF.R")
 
 lrns = list(
-  makeLearner("classif.tuneRanger", id = "tuneRFMMCE", predict.type = "prob", 
+  makeLearner("classif.tuneRanger", id = "tuneRFMMCE", predict.type = "prob",
     par.vals = list(num.trees = 2000, num.threads = 10, measure = list(mmce))),
   makeLearner("classif.tuneRanger", id = "tuneRFAUC", predict.type = "prob", 
     par.vals = list(num.trees = 2000, num.threads = 10, measure = list(multiclass.au1p))),
@@ -33,7 +33,7 @@ lrns = list(
   makeLearner("classif.ranger", id = "ranger", par.vals = list(num.trees = 2000, num.threads = 10, respect.unordered.factors = "order"), predict.type = "prob")
 )
 
-rdesc = makeResampleDesc("CV", iters = 5)
+rdesc = makeResampleDesc("Holdout")
 measures = list(mmce, multiclass.au1p, multiclass.brier, logloss, timetrain)
 configureMlr(on.learner.error = "warn")
 set.seed(126)
@@ -81,6 +81,15 @@ for(i in seq_along(task.ids.bmr)) { # 13 datasets
 load("./benchmark/bmr.RData")
 # Which datasets are not super easy (AUC < 0.99) and discriminate between the algorithms?
 
+# Analyse "strange" logloss results for ranger
+rdesc = makeResampleDesc("Holdout")
+set.seed(200)
+task = getOMLTask(task.ids.bmr[13])
+task = convertOMLTaskToMlr(task)$mlr.task
+bmr_tuneRF = benchmark(lrns[11:12], task, rdesc, measures, keep.pred = TRUE, models = FALSE)
+hist(sort(bmr_tuneRF$results$`blood-transfusion-service-center`$tuneRF$pred$data$prob.1), type = "l")
+hist(sort(bmr_tuneRF$results$`blood-transfusion-service-center`$ranger$pred$data$prob.1), col = "red")
+
 # medium datasets (between 160 seconds and 10 minutes)
 task.ids.bmr2 = task.ids[which((unlist(time.estimate)-100)>60 & (unlist(time.estimate))<600)]
 unlist(time.estimate)[which((unlist(time.estimate)-100)>60 & (unlist(time.estimate))<600 )]
@@ -88,7 +97,7 @@ unlist(time.estimate)[which((unlist(time.estimate)-100)>60 & (unlist(time.estima
 # 13 datasets
 for(i in seq_along(task.ids.bmr2)) {
   print(i)
-  set.seed(200 + i)
+  set.seed(300 + i)
   task = getOMLTask(task.ids.bmr2[i])
   task = convertOMLTaskToMlr(task)$mlr.task
   bmr[[length(bmr) + 1]] = benchmark(lrns, task, rdesc, measures, keep.pred = FALSE, models = FALSE)
@@ -98,6 +107,7 @@ load("./benchmark/bmr.RData")
 
 # big datasets (between 10 minutes and 1 hour)
 task.ids.bmr3 = task.ids[which((unlist(time.estimate))>600 & (unlist(time.estimate))<3600)]
+unlist(time.estimate)[which((unlist(time.estimate))>600 & (unlist(time.estimate))<3600)]
 # 9 datasets
 
 rdesc = makeResampleDesc("CV", iters = 5)
@@ -105,8 +115,7 @@ rdesc = makeResampleDesc("CV", iters = 5)
 # Zunächst einfach mal durchlaufen lassen (kann dannach hinzugefügt werden).
 for(i in seq_along(task.ids.bmr3)) {
   print(i)
-  # set.seed(245 + i) # 1. Durchlauf
-  set.seed(345) # 2. Durchlauf
+  set.seed(400 + i) 
   task = getOMLTask(task.ids.bmr3[i])
   task = convertOMLTaskToMlr(task)$mlr.task
   bmr[[length(bmr) + 1]] = benchmark(lrns, task, rdesc, measures, keep.pred = FALSE, models = FALSE)
@@ -115,7 +124,9 @@ for(i in seq_along(task.ids.bmr3)) {
 load("./benchmark/bmr.RData")
 
 # Very big datasets, 4 datasets
+tasks4 = tasks[which((unlist(time.estimate))>=3600),]
 task.ids.bmr4 = task.ids[which((unlist(time.estimate))>=3600)]
+unlist(time.estimate)[which((unlist(time.estimate))>=3600)]
 
 # Analysis
 
