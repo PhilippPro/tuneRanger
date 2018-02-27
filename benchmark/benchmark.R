@@ -41,6 +41,10 @@ bmr1 = benchmark(lrns, iris.task, rdesc, measures)
 
 library(OpenML)
 task.ids = listOMLTasks(number.of.classes = 2L, number.of.missing.values = 0, tag = "OpenML100", estimation.procedure = "10-fold Crossvalidation")$task.id
+
+task.ids = listOMLTasks(tag = "OpenML100", estimation.procedure = "10-fold Crossvalidation")$task.id
+length(task.ids)
+
 save(task.ids, file = "./benchmark/task_ids.RData")
 tasks = listOMLTasks(number.of.classes = 2L, number.of.missing.values = 0, tag = "OpenML100", estimation.procedure = "10-fold Crossvalidation")
 
@@ -111,6 +115,7 @@ unlist(time.estimate)[which((unlist(time.estimate))>600 & (unlist(time.estimate)
 # 9 datasets
 
 rdesc = makeResampleDesc("CV", iters = 5)
+bmr_big = list()
 # Hier evtl. doch ein paar Wiederholungen einbauen, da die Streuung sonst zu groß ist. 
 # Zunächst einfach mal durchlaufen lassen (kann dannach hinzugefügt werden).
 for(i in seq_along(task.ids.bmr3)) {
@@ -118,10 +123,10 @@ for(i in seq_along(task.ids.bmr3)) {
   set.seed(400 + i) 
   task = getOMLTask(task.ids.bmr3[i])
   task = convertOMLTaskToMlr(task)$mlr.task
-  bmr[[length(bmr) + 1]] = benchmark(lrns, task, rdesc, measures, keep.pred = FALSE, models = FALSE)
-  save(bmr, file = "./benchmark/bmr.RData")
+  bmr_big[[length(bmr_big) + 1]] = benchmark(lrns, task, rdesc, measures, keep.pred = FALSE, models = FALSE)
+  save(bmr_big, file = "./benchmark/bmr_big.RData")
 }
-load("./benchmark/bmr.RData")
+load("./benchmark/bmr_big.RData")
 
 # Very big datasets, 4 datasets
 tasks4 = tasks[which((unlist(time.estimate))>=3600),]
