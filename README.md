@@ -15,7 +15,7 @@ The package is mainly based on [ranger](https://github.com/imbs-hl/ranger), [mlr
 ## Installation
 The development version
 
-    
+    devtools::install_github("mlr-org/mlr")
     devtools::install_github("PhilippPro/tuneRanger")
     
     
