@@ -1,4 +1,5 @@
 library(devtools)
+library(OpenML)
 load_all("../tuneRanger")
 
 # Compare runtime and AUC/Brier Score with mlr
@@ -39,9 +40,7 @@ configureMlr(on.learner.error = "warn")
 set.seed(126)
 bmr1 = benchmark(lrns, iris.task, rdesc, measures)
 
-library(OpenML)
 task.ids = listOMLTasks(number.of.classes = 2L, number.of.missing.values = 0, tag = "OpenML100", estimation.procedure = "10-fold Crossvalidation")$task.id
-
 task.ids = listOMLTasks(tag = "OpenML100", estimation.procedure = "10-fold Crossvalidation")$task.id
 length(task.ids)
 
@@ -93,6 +92,7 @@ task = convertOMLTaskToMlr(task)$mlr.task
 bmr_tuneRF = benchmark(lrns[11:12], task, rdesc, measures, keep.pred = TRUE, models = FALSE)
 hist(sort(bmr_tuneRF$results$`blood-transfusion-service-center`$tuneRF$pred$data$prob.1), type = "l")
 hist(sort(bmr_tuneRF$results$`blood-transfusion-service-center`$ranger$pred$data$prob.1), col = "red")
+rdesc = makeResampleDesc("RepCV", reps = 10, folds = 5)
 
 # medium datasets (between 160 seconds and 10 minutes)
 task.ids.bmr2 = task.ids[which((unlist(time.estimate)-100)>60 & (unlist(time.estimate))<600)]
