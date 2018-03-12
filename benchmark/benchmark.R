@@ -40,13 +40,8 @@ set.seed(126)
 bmr1 = benchmark(lrns, iris.task, rdesc, measures)
 
 library(OpenML)
-task.ids = listOMLTasks(number.of.classes = 2L, number.of.missing.values = 0, tag = "OpenML100", estimation.procedure = "10-fold Crossvalidation")$task.id
-
-task.ids = listOMLTasks(tag = "OpenML100", estimation.procedure = "10-fold Crossvalidation")$task.id
-length(task.ids)
-
-save(task.ids, file = "./benchmark/task_ids.RData")
-tasks = listOMLTasks(number.of.classes = 2L, number.of.missing.values = 0, tag = "OpenML100", estimation.procedure = "10-fold Crossvalidation")
+#task.ids = listOMLTasks(number.of.classes = 2L, number.of.missing.values = 0, tag = "OpenML100", estimation.procedure = "10-fold Crossvalidation")$task.id
+#save(task.ids, file = "./benchmark/task_ids.RData")
 
 # time estimation
 time.estimate = list()
@@ -71,7 +66,7 @@ configureMlr(on.learner.error = "warn")
 # take only small ones first; afterwards some bigger datasets
 task.ids.bmr = task.ids[which((unlist(time.estimate)-100)<60)]
 cbind(time.estimate, (unlist(time.estimate)-100)<60)
-
+unlist(time.estimate)[which((unlist(time.estimate)-100)<60)]
 tasks[which((unlist(time.estimate)-100)<60),]
 
 for(i in seq_along(task.ids.bmr)) { # 13 datasets
@@ -84,15 +79,6 @@ for(i in seq_along(task.ids.bmr)) { # 13 datasets
 }
 load("./benchmark/bmr.RData")
 # Which datasets are not super easy (AUC < 0.99) and discriminate between the algorithms?
-
-# Analyse "strange" logloss results for ranger
-rdesc = makeResampleDesc("Holdout")
-set.seed(200)
-task = getOMLTask(task.ids.bmr[13])
-task = convertOMLTaskToMlr(task)$mlr.task
-bmr_tuneRF = benchmark(lrns[11:12], task, rdesc, measures, keep.pred = TRUE, models = FALSE)
-hist(sort(bmr_tuneRF$results$`blood-transfusion-service-center`$tuneRF$pred$data$prob.1), type = "l")
-hist(sort(bmr_tuneRF$results$`blood-transfusion-service-center`$ranger$pred$data$prob.1), col = "red")
 
 # medium datasets (between 160 seconds and 10 minutes)
 task.ids.bmr2 = task.ids[which((unlist(time.estimate)-100)>60 & (unlist(time.estimate))<600)]
@@ -133,38 +119,181 @@ tasks4 = tasks[which((unlist(time.estimate))>=3600),]
 task.ids.bmr4 = task.ids[which((unlist(time.estimate))>=3600)]
 unlist(time.estimate)[which((unlist(time.estimate))>=3600)]
 
-# Analysis
+######################################################### Analysis ######################################################
+
+load("./benchmark/bmr.RData")
+
+# Analyse "strange" logloss results for ranger
+rdesc = makeResampleDesc("Holdout")
+set.seed(200)
+task = getOMLTask(task.ids.bmr[13])
+task = convertOMLTaskToMlr(task)$mlr.task
+bmr_tuneRF = benchmark(lrns[11:12], task, rdesc, measures, keep.pred = TRUE, models = FALSE)
+hist(sort(bmr_tuneRF$results$`blood-transfusion-service-center`$tuneRF$pred$data$prob.1))
+hist(sort(bmr_tuneRF$results$`blood-transfusion-service-center`$ranger$pred$data$prob.1), col = "red")
 
 library(mlr)
 # Data cleaning
+names = names(bmr[[1]]$results[[1]]$tuneRFMMCE$aggr)
+nr.learners = length(bmr[[1]]$learners)
 
-# caret problems
-a = bmr[[30]]
-a$results$Australian$caret$measures.test
-# no results at all
+# if less than 20 percent NA, impute by the mean of the other iterations
+for(i in seq_along(bmr)) {
+  for(j in 1:nr.learners) {
+    print(paste(i,j))
+    na.percentage = mean(is.na(bmr[[i]]$results[[1]][[j]]$measures.test$mmce))
+    if(na.percentage > 0 & na.percentage <= 0.2) {
+      resis = bmr[[i]]$results[[1]][[j]]$measures.test
+      bmr[[i]]$results[[1]][[j]]$aggr = colMeans(resis[!is.na(resis$mmce),])[2:6]
+      names(bmr[[i]]$results[[1]][[j]]$aggr) = names
+    }
+  }
+}
 
-# tuneRangerMMCE problems
-a = bmr[[20]]
-resis = a$results$`kr-vs-kp`$tuneRFMMCE$measures.test
-resis = resis[!is.na(resis$mmce),]
-names = names(bmr[[20]]$results$`kr-vs-kp`$tuneRFMMCE$aggr)
-bmr[[20]]$results$`kr-vs-kp`$tuneRFMMCE$aggr = colMeans(resis)[2:6]
-names(bmr[[20]]$results$`kr-vs-kp`$tuneRFMMCE$aggr) = names
+# Analysis of time
+resi = list()
+resi[[1]] = data.frame(getBMRAggrPerformances(bmr[[1]]))
 
-# tuneRF problems
-a = bmr[[4]]
-resis = a$results[[1]]$tuneRF$measures.test
-resis = resis[!is.na(resis$mmce),]
-names = names(bmr[[20]]$results$`kr-vs-kp`$tuneRFMMCE$aggr)
-bmr[[20]]$results$`kr-vs-kp`$tuneRFMMCE$aggr = colMeans(resis)[2:6]
-names(bmr[[20]]$results$`kr-vs-kp`$tuneRFMMCE$aggr) = names
+for(i in 2:length(bmr)) {
+  resi[[i]] = data.frame(getBMRAggrPerformances(bmr[[i]]))
+  # caret gets no result, if NA
+}
 
-# mlr summary functions
-bmr_tot = bmr[[1]]
-for(i in 2:length(bmr))
-  bmr_tot$results = c(bmr_tot$results, bmr[[i]]$results)
-plotBMRSummary(bmr_tot, pretty.names = F, pointsize = 4, jitter = 0.2, measure = multiclass.au1p)
+lty.vec = c(rep(1,4), c(2,3,4,5))
+library(RColorBrewer)
+col.vec = brewer.pal(8, "Dark2")
+time = matrix(NA, length(bmr),  ncol(resi[[1]])-4)
+for(i in seq_along(bmr)) {
+  time[i,] = unlist(resi[[i]][5,-c(5:8)])
+}
+time_order = order(time[,1])
+time = time[time_order,]
+plot(time[,1], type = "l", ylim = c(0, max(time, na.rm = T)), ylab = "Time in seconds", xlab = "Dataset number", col = col.vec[1])
+for(i in 2:ncol(time)){
+  points(1:length(bmr), time[,i], col = col.vec[i], cex = 0.4)
+  lines(time[,i], col = col.vec[i], lty = lty.vec[i])
+}
+leg.names = c("tuneRangerMMCE", "tuneRangerAUC", "tuneRangerBrier", "tuneRangerLogloss", "mlrHyperopt", "caret", "tuneRF", "ranger default")
+legend("topleft", legend = leg.names, col = col.vec, lty = lty.vec)
 
+
+# Descriptive Analysis
+resi = list()
+resi[[1]] = data.frame(getBMRAggrPerformances(bmr[[1]]))
+res_aggr = resi[[1]]
+res_aggr_rank = apply(resi[[1]][-c(5:8)], 1, rank)
+
+for(i in 2:length(bmr)) {
+  resi[[i]] = data.frame(getBMRAggrPerformances(bmr[[i]]))
+  # models gets the worst result, if NA
+  for(j in 1:12) {
+    print(paste(i,j))
+    if(is.na(resi[[i]][1,j])) {
+      resi[[i]][1,j] = max(resi[[i]][1,], na.rm = T)
+      resi[[i]][2,j] = min(resi[[i]][2,], na.rm = T)
+      resi[[i]][3,j] = max(resi[[i]][3,], na.rm = T)
+      resi[[i]][4,j] = max(resi[[i]][4,], na.rm = T)
+      resi[[i]][5,j] = max(resi[[i]][5,], na.rm = T)
+    }
+  }
+  res_aggr = res_aggr + resi[[i]]
+  res_aggr_rank = res_aggr_rank + apply(resi[[i]][-c(5:8)], 1, rank)
+}
+res_aggr = res_aggr/length(bmr)
+
+# Graphical analysis of performance
+# Compared to ranger model
+perfis = list()
+lrn.names2 = c(paste0(c("MMCE", "AUC", "Brier", "Logloss")), "mlrHyp.", "caret", "tuneRF", "ranger")
+perfi = matrix(NA, length(bmr),  ncol(resi[[1]])-4)
+for(j in c(1:4)) {
+  for(i in 1:length(bmr)) {
+    perfi[i,] = unlist(resi[[i]][j,])[-c(5:8)] - unlist(resi[[i]][j,12])[-c(5:8)]
+  }
+  colnames(perfi) = lrn.names2
+  perfis[[j]] = perfi
+}
+
+measure.names = c("Error rate", "AUC", "Brier score", "Logarithmic Loss")
+op <- par(mfrow = c(4,2),
+  oma = c(0,0,0,0) + 0.1,
+  mar = c(2.5,2,1,0) + 0.1)
+outline = c(TRUE, FALSE)
+outlier_name = c("", "(without outliers)")
+for(i in 1:4) {
+  for(j in 1:2) {
+    boxplot(perfis[[i]], main = paste(measure.names[i], outlier_name[j]), horizontal = F, xaxt = "n", outline = outline[j])
+    axis(1, at = c(1,2,3,4,5,6,7,8), labels = FALSE, cex = 0.1, tck = -0.02)
+    #axis(1, at = c(6,8), labels = FALSE, cex = 0.1, tck = -0.07)
+    mtext(lrn.names2[c(1,2,3,4,5,6,7,8)], 1, line = 0.1, at = c(1,2,3,4,5.1,6,7,8), cex = 0.6)
+    #mtext(lrn.names2[c(6,8)], 1, line = 0.7, at = c(6,8), cex = 0.6)
+    mtext(expression(bold("tuneRanger")), 1, line = 1.2, at = 2.5, cex = 0.6)
+    abline(0, 0, col = "red")
+    axis(1,at=c(0.5,1,2,3,3.5,4,4.5),col="black",line=1.15,tick=T,labels=rep("",7),lwd=2,lwd.ticks=0)
+  }
+}
+
+lrn.names1 = c(paste0("tuneRanger", apply(expand.grid(c("MMCE", "AUC", "Brier", "Logloss"), c("","_mtry")), 1, paste0, collapse="")), "mlrHyperopt", "caret", "tuneRF", "ranger")
+lrn.names2 = c(paste0("tuneRanger", c("MMCE", "AUC", "Brier", "Logloss")), "mlrHyperopt", "caret", "tuneRF", "ranger")
+colnames(res_aggr) = lrn.names1
+library(stringr)
+rownames(res_aggr) = str_sub(rownames(res_aggr), start=1, end=-11)
+t(res_aggr)
+rownames(res_aggr) = c("Error rate", "(Multiclass) AUC", "Brier Score", "Logarithmic Loss", "Training Runtime")
+library(xtable)
+xtable(t(res_aggr), digits = 4, caption = "Average performance results of the different algorithms for the small datasets", label = "avg_small")
+
+# average rank matrix
+res_aggr_rank = res_aggr_rank/length(bmr)
+
+rownames(res_aggr_rank) = lrn.names2
+colnames(res_aggr_rank) = str_sub(colnames(res_aggr_rank), start=1, end=-11)
+colnames(res_aggr_rank) = c("Error rate", "(Multiclass) AUC", "Brier Score", "Logarithmic Loss", "Training Runtime")
+xtable(res_aggr_rank, digits = 2, caption = "Average rank results of the different algorithms for the small datasets", label = "rank_small")
+
+library(knitr)
+rownames(res_aggr) = paste("--", c("Error rate", "(Multiclass) AUC", "Brier Score", "Logarithmic Loss", "Training Runtime"))
+kable(t(round(res_aggr,4)))
+colnames(res_aggr_rank) = paste("--", c("Error rate", "(Multiclass) AUC", "Brier Score", "Logarithmic Loss", "Training Runtime"))
+kable(round(res_aggr_rank,2))
+
+# Tuning only mtry is clearly worse
+
+perfis = list()
+lrn.names2 = c(paste0(c("MMCE", "AUC", "Brier", "Logloss")))
+perfi = matrix(NA, length(bmr), 4)
+for(j in c(1:4)) {
+  for(i in 1:length(bmr)) {
+    perfi[i,] = unlist(resi[[i]][j,])[5:8] - unlist(resi[[i]][j,])[1:4]
+  }
+  colnames(perfi) = lrn.names2
+  perfis[[j]] = perfi
+}
+
+lapply(lapply(perfis, colMeans), mean)
+
+measure.names = c("Error rate", "AUC", "Brier score", "Logarithmic Loss")
+op <- par(mfrow = c(4,2),
+  oma = c(0,0,0,0) + 0.1,
+  mar = c(2.5,2,1,0) + 0.1)
+outline = c(TRUE, FALSE)
+outlier_name = c("", "(without outliers)")
+for(i in 1:4) {
+  for(j in 1:2) {
+    boxplot(perfis[[i]], main = paste(measure.names[i], outlier_name[j]), horizontal = F, xaxt = "n", outline = outline[j])
+    axis(1, at = c(1,2,3,4,5,6,7,8), labels = FALSE, cex = 0.1, tck = -0.02)
+    #axis(1, at = c(6,8), labels = FALSE, cex = 0.1, tck = -0.07)
+    mtext(lrn.names2[c(1,2,3,4,5,6,7,8)], 1, line = 0.1, at = c(1,2,3,4,5.1,6,7,8), cex = 0.6)
+    #mtext(lrn.names2[c(6,8)], 1, line = 0.7, at = c(6,8), cex = 0.6)
+    mtext(expression(bold("tuneRanger")), 1, line = 1.2, at = 2.5, cex = 0.6)
+    abline(0, 0, col = "red")
+    axis(1,at=c(0.5,1,2,3,3.5,4,4.5),col="black",line=1.15,tick=T,labels=rep("",7),lwd=2,lwd.ticks=0)
+  }
+}
+
+
+
+# Annex
 
 # Wilcoxon paired test
 library(mlr)
@@ -193,117 +322,22 @@ wilcox.test(data[,1,4], data[,2,4], paired = TRUE)
 mean(data[,1,1], na.rm = T)
 mean(data[,2,1], na.rm = T)
 
-# Descriptive Analysis
-resi = list()
-resi[[1]] = data.frame(getBMRAggrPerformances(bmr[[1]]))
-res_aggr = resi[[1]]
-res_aggr_rank = apply(resi[[1]], 1, rank)
-
-for(i in 2:length(bmr)) {
-  resi[[i]] = data.frame(getBMRAggrPerformances(bmr[[i]]))
-  # caret gets the worst result, if NA
-  if(is.na(resi[[i]][1,6])) {
-    resi[[i]][1,6] = max(resi[[i]][1,], na.rm = T)
-    resi[[i]][2,6] = min(resi[[i]][2,], na.rm = T)
-    resi[[i]][3,6] = max(resi[[i]][3,], na.rm = T)
-    resi[[i]][4,6] = max(resi[[i]][4,], na.rm = T)
-    resi[[i]][5,6] = max(resi[[i]][5,], na.rm = T)
-  }
-  # tuneRF gets the worst results if NA
-  if(is.na(resi[[i]][1,7])) {
-    resi[[i]][1,7] = max(resi[[i]][1,], na.rm = T)
-    resi[[i]][2,7] = min(resi[[i]][2,], na.rm = T)
-    resi[[i]][3,7] = max(resi[[i]][3,], na.rm = T)
-    resi[[i]][4,7] = max(resi[[i]][4,], na.rm = T)
-    resi[[i]][5,7] = max(resi[[i]][5,], na.rm = T)
-  }
-  res_aggr = res_aggr + resi[[i]]
-  res_aggr_rank = res_aggr_rank + apply(resi[[i]], 1, rank)
-}
-res_aggr = res_aggr/length(bmr)
-lrn.names = c(paste0("tuneRanger", c("MMCE", "AUC", "Brier", "Logloss")), "hyperopt", "caret", "tuneRF", "ranger")
-colnames(res_aggr) = lrn.names
-library(stringr)
-rownames(res_aggr) = str_sub(rownames(res_aggr), start=1, end=-11)
-t(res_aggr)
-rownames(res_aggr) = c("Error rate", "(Multiclass) AUC", "Brier Score", "Logarithmic Loss", "Training Runtime")
-library(xtable)
-xtable(t(res_aggr), digits = 4, caption = "Average performance results of the different algorithms for the small datasets", label = "avg_small")
-
-# average rank matrix
-res_aggr_rank = res_aggr_rank/length(bmr)
-
-rownames(res_aggr_rank) = lrn.names
-colnames(res_aggr_rank) = str_sub(colnames(res_aggr_rank), start=1, end=-11)
-colnames(res_aggr_rank) = c("Error rate", "(Multiclass) AUC", "Brier Score", "Logarithmic Loss", "Training Runtime")
-xtable(res_aggr_rank, digits = 2, caption = "Average rank results of the different algorithms for the small datasets", label = "rank_small")
-
-library(knitr)
-rownames(res_aggr) = paste("--", c("Error rate", "(Multiclass) AUC", "Brier Score", "Logarithmic Loss", "Training Runtime"))
-kable(t(round(res_aggr,4)))
-colnames(res_aggr_rank) = paste("--", c("Error rate", "(Multiclass) AUC", "Brier Score", "Logarithmic Loss", "Training Runtime"))
-kable(round(res_aggr_rank,2))
 
 
-# Analysis of time
-time = matrix(NA, length(bmr),  ncol(resi[[1]]))
-for(i in 1:30) {
-  time[i,] = unlist(resi[[i]][5,])
-}
-time_order = order(time[,1])
-time = time[time_order,]
-plot(time[,1], type = "l", ylim = c(0, max(time, na.rm = T)), ylab = "Time in seconds", xlab = "Dataset number")
-for(i in 2:ncol(time))
-  lines(time[,i], col = i)
-legend("topleft", legend = lrn.names, col = 1:ncol(time), lty = 1)
-
-# Graphical analysis of performance
-perfi = matrix(NA, length(bmr),  ncol(resi[[1]]))
-for(j in c(1:4)) {
-  for(i in 1:30) {
-    perfi[i,] = unlist(resi[[i]][j,])
-  }
-  #perfi = perfi[time_order,]
-  perfi = perfi[order(perfi[,1]),]
-  print(plot(perfi[,1], type = "l", ylim = c(min(perfi, na.rm = T), max(perfi, na.rm = T)), ylab = rownames(res_aggr)[j], xlab = "Dataset number"))
-  for(i in 2:ncol(time))
-    lines(perfi[,i], col = i)
-  legend("topleft", legend = lrn.names, col = 1:ncol(perfi), lty = 1)
-}
-
-# Compared to ranger model
-perfis = list()
-lrn.names2 = c(paste0("tR", c("MMCE", "AUC", "Brier", "Logloss")), "hyperopt", "caret", "tuneRF", "ranger")
-perfi = matrix(NA, length(bmr),  ncol(resi[[1]]))
-for(j in c(1:4)) {
-  for(i in 1:30) {
-    perfi[i,] = unlist(resi[[i]][j,]) - unlist(resi[[i]][j,8])
-  }
-  colnames(perfi) = lrn.names2
-  perfis[[j]] = perfi
-  
-  #perfi = perfi[time_order,]
-  #perfi = perfi[order(perfi[,1]),]
-  print(plot(perfi[,1], type = "l", ylim = c(min(perfi, na.rm = T), max(perfi, na.rm = T)), ylab = rownames(res_aggr)[j], xlab = "Dataset number"))
-  for(i in 2:ncol(time))
-    lines(perfi[,i], col = i)
-  legend("bottomright", legend = sapply(lrns, getLearnerId), col = 1:ncol(perfi), lty = 1)
-}
-
-measure.names = c("Error rate", "(Multiclass) AUC", "Brier Score", "Logarithmic Loss")
-op <- par(mfrow = c(2,2),
-  oma = c(0,0,0,0) + 0.1,
-  mar = c(2,2,1,0) + 0.1)
 
 
-for(i in 1:4) {
-  boxplot(perfis[[i]], main = measure.names[i])
-  abline(0, 0, col = "red")
-}
-for(i in 1:4) {
-  boxplot(perfis[[i]], outline = FALSE, main = measure.names[i])
-  abline(0, 0, col = "red")
-}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # regression
