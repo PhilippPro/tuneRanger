@@ -120,6 +120,16 @@ tasks4 = tasks[which((unlist(time.estimate))>=3600),]
 task.ids.bmr4 = task.ids[which((unlist(time.estimate))>=3600)]
 unlist(time.estimate)[which((unlist(time.estimate))>=3600)]
 
+for(i in seq_along(task.ids.bmr4)) {
+  print(i)
+  set.seed(400 + i) 
+  task = getOMLTask(task.ids.bmr4[i])
+  task = convertOMLTaskToMlr(task)$mlr.task
+  bmr_big[[length(bmr_big) + 1]] = benchmark(lrns, task, rdesc, measures, keep.pred = FALSE, models = FALSE)
+  save(bmr_big, file = "./benchmark/bmr_big.RData")
+}
+load("./benchmark/bmr_big.RData")
+
 ######################################################### Analysis ######################################################
 
 load("./benchmark/bmr.RData")
@@ -291,6 +301,33 @@ for(i in 1:4) {
     axis(1,at=c(0.5,1,2,3,3.5,4,4.5),col="black",line=1.15,tick=T,labels=rep("",7),lwd=2,lwd.ticks=0)
   }
 }
+
+# Descriptive Analysis for bmr_one (mtry-Trafo) Ergebnisse.
+resi = list()
+resi[[1]] = data.frame(getBMRAggrPerformances(bmr[[1]]), getBMRAggrPerformances(bmr_one[[1]])[[1]])
+res_aggr = resi[[1]]
+res_aggr_rank = apply(resi[[1]][-c(5:8)], 1, rank)
+
+for(i in 2:length(bmr)) {
+  resi[[i]] = data.frame(getBMRAggrPerformances(bmr[[i]]), getBMRAggrPerformances(bmr_one[[i]])[[1]])
+  # models gets the worst result, if NA
+  for(j in 1:ncol(resi[[i]])) {
+    print(paste(i,j))
+    if(is.na(resi[[i]][1,j])) {
+      resi[[i]][1,j] = max(resi[[i]][1,], na.rm = T)
+      resi[[i]][2,j] = min(resi[[i]][2,], na.rm = T)
+      resi[[i]][3,j] = max(resi[[i]][3,], na.rm = T)
+      resi[[i]][4,j] = max(resi[[i]][4,], na.rm = T)
+      resi[[i]][5,j] = max(resi[[i]][5,], na.rm = T)
+    }
+  }
+  res_aggr = res_aggr + resi[[i]]
+  res_aggr_rank = res_aggr_rank + apply(resi[[i]][-c(5:8)], 1, rank)
+}
+res_aggr = res_aggr/length(bmr)
+# Kein signifikante Unterschied, auch kaum schneller.
+
+
 
 
 

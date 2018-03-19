@@ -21,8 +21,8 @@ estimateTimeTuneRanger = function(task, iters = 100, num.threads = 1, num.trees 
     # Train model and avoid the nasty error message from ranger
   time =  system.time(mod <- catchOrderWarning(mlr::train(lrn, task)))[3]
   
-  cat(paste("Approximated time for tuning:", my_seconds_to_period(time * iters + 100)))
-  invisible(time*iters + 100)
+  cat(paste("Approximated time for tuning:", my_seconds_to_period(time * iters + 50)))
+  invisible(time*iters + 50)
 }
 
 my_seconds_to_period = function(x) {

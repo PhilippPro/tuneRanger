@@ -1,6 +1,6 @@
 #' tuneRanger
 #' 
-#' Automatic tuning of random forests of the (\code{\link[ranger]{ranger}}) package with one line of code. 
+#' Automatic tuning of random forests of the \code{\link[ranger]{ranger}} package with one line of code. 
 #'
 #' @param task The mlr task created by \code{\link[mlr]{makeClassifTask}} or \code{\link[mlr]{makeRegrTask}}. 
 #' @param measure Performance measure to evaluate. Default is auc for classification and mse for regression. Other possible performance measures can be looked up here: https://mlr-org.github.io/mlr-tutorial/release/html/performance/index.html
@@ -43,7 +43,9 @@
 #' # Mean of best 5 % of the results
 #' res
 #' # Model with the new tuned hyperparameters
-#' res$model}
+#' res$model
+#' # Prediction
+#' predict(res$model, newdata = iris[1:10,])}
 tuneRanger = function(task, measure = NULL, iters = 70, iters.warmup = 30, num.threads = NULL, num.trees = 1000, 
   parameters = list(replace = FALSE, respect.unordered.factors = "order"), 
   tune.parameters = c("mtry", "min.node.size", "sample.fraction"), save.file.path = NULL,
@@ -94,9 +96,12 @@ tuneRanger = function(task, measure = NULL, iters = 70, iters.warmup = 30, num.t
   }
   
   # Transformation of nodesize
-  trafo_nodesize = function(x) ceiling(2^(log(size * 0.2, 2) * x))
+  trafo_nodesize = function(x) ceiling((size * 0.2)^x)
+  #trafo_mtry = function(x) round(NFeats^x)
+  
   # Its ParamSet
   ps = makeParamSet(
+    #makeNumericParam("mtry", lower = 0, upper = 1, trafo = trafo_mtry), 
     makeIntegerParam("mtry", lower = 1, upper = NFeats),
     makeNumericParam("min.node.size", lower = 0, upper = 1, trafo = trafo_nodesize), 
     makeNumericParam("sample.fraction", lower = 0.2, upper = 0.9),
@@ -153,6 +158,8 @@ tuneRanger = function(task, measure = NULL, iters = 70, iters.warmup = 30, num.t
   res = data.frame(result$opt.path)
   if("min.node.size" %in% tune.parameters)
     res$min.node.size = trafo_nodesize_end(res$min.node.size, size)
+  #if("mtry" %in% tune.parameters)
+  #  res$mtry = trafo_mtry_end(res$mtry, NFeats)
   colnames(res)[colnames(res) == "y"] = measure.name
   res = res[, c(tune.parameters, measure.name, "exec.time")]
   
@@ -189,7 +196,8 @@ print.tuneRanger = function(x, ...) {
   print(x$recommended.pars[c(ln-1, ln)])
 }
 
-trafo_nodesize_end = function(x, size) ceiling(2^(log(size * 0.2, 2) * x))
+trafo_mtry_end = function(x, NFeats) round(NFeats^x)
+trafo_nodesize_end = function(x, size) ceiling((size * 0.2)^x)
 
 summaryfunction = function(x) ifelse(class(x) %in% c("numeric", "integer"), mean(x), 
   names(sort(table(x), decreasing = TRUE)[1]))

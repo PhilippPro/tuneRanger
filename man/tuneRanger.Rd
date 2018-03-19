@@ -41,7 +41,7 @@ Default is \code{TRUE}.}
 list with recommended parameters and a data.frame with all evaluated hyperparameters and performance and time results for each run
 }
 \description{
-Automatic tuning of random forests of the (\code{\link[ranger]{ranger}}) package with one line of code.
+Automatic tuning of random forests of the \code{\link[ranger]{ranger}} package with one line of code.
 }
 \details{
 Model based optimization is used as tuning strategy and the three parameters min.node.size, sample.fraction and mtry are tuned at once. Out-of-bag predictions are used for evaluation, which makes it much faster than other packages and tuning strategies that use for example 5-fold cross-validation. Classification as well as regression is supported. 
@@ -65,7 +65,9 @@ res = tuneRanger(iris.task, measure = list(multiclass.brier), num.trees = 1000,
 # Mean of best 5 \% of the results
 res
 # Model with the new tuned hyperparameters
-res$model}
+res$model
+# Prediction
+predict(res$model, newdata = iris[1:10,])}
 }
 \seealso{
 \code{\link{estimateTimeTuneRanger}} for time estimation and \code{\link{restartTuneRanger}} for continuing the algorithm if there was an error.
