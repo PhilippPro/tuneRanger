@@ -18,6 +18,7 @@
 #' @param build.final.model [\code{logical(1)}]\cr
 #'   Should the best found model be fitted on the complete dataset?
 #'   Default is \code{TRUE}. 
+#' @param show.info Verbose mlrMBO output on console? Default is \code{TRUE}.
 #' @import ranger mlr mlrMBO ParamHelpers BBmisc stats smoof lhs parallel
 #' @importFrom DiceKriging km predict.km
 #' @return list with recommended parameters and a data.frame with all evaluated hyperparameters and performance and time results for each run
@@ -49,7 +50,7 @@
 tuneRanger = function(task, measure = NULL, iters = 70, iters.warmup = 30, num.threads = NULL, num.trees = 1000, 
   parameters = list(replace = FALSE, respect.unordered.factors = "order"), 
   tune.parameters = c("mtry", "min.node.size", "sample.fraction"), save.file.path = NULL,
-  build.final.model = TRUE) {
+  build.final.model = TRUE, show.info = getOption("mlrMBO.show.info", TRUE)) {
   
   if(is.null(save.file.path)) {
     save.on.disk.at = NULL
@@ -153,7 +154,7 @@ tuneRanger = function(task, measure = NULL, iters = 70, iters.warmup = 30, num.t
   mbo.learner = makeLearner("regr.km", covtype = "matern3_2", optim.method = "BFGS", nugget.estim = TRUE, 
     jitter = TRUE, predict.type = "se", config = list(show.learner.output = FALSE))
   
-  result = mbo(fun = objFun, design = design, learner = mbo.learner, control = control)
+  result = mbo(fun = objFun, design = design, learner = mbo.learner, control = control, show.info = show.info)
   
   res = data.frame(result$opt.path)
   if("min.node.size" %in% tune.parameters)

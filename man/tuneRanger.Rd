@@ -8,7 +8,7 @@ tuneRanger(task, measure = NULL, iters = 70, iters.warmup = 30,
   num.threads = NULL, num.trees = 1000, parameters = list(replace = FALSE,
   respect.unordered.factors = "order"), tune.parameters = c("mtry",
   "min.node.size", "sample.fraction"), save.file.path = NULL,
-  build.final.model = TRUE)
+  build.final.model = TRUE, show.info = getOption("mlrMBO.show.info", TRUE))
 }
 \arguments{
 \item{task}{The mlr task created by \code{\link[mlr]{makeClassifTask}} or \code{\link[mlr]{makeRegrTask}}.}
@@ -36,6 +36,8 @@ started again with \code{\link{restartTuneRanger}}.}
 \item{build.final.model}{[\code{logical(1)}]\cr
 Should the best found model be fitted on the complete dataset?
 Default is \code{TRUE}.}
+
+\item{show.info}{Verbose mlrMBO output on console? Default is \code{TRUE}.}
 }
 \value{
 list with recommended parameters and a data.frame with all evaluated hyperparameters and performance and time results for each run
