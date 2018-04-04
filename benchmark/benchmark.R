@@ -132,7 +132,24 @@ load("./benchmark/bmr_big.RData")
 
 ######################################################### Analysis ######################################################
 
-load("./benchmark/bmr.RData")
+# bad ranger results
+rdesc = makeResampleDesc("Holdout")
+set.seed(200)
+task = getOMLTask(task.ids.bmr[5])
+task = convertOMLTaskToMlr(task)$mlr.task
+bmr = benchmark(lrns[c(12)], task, rdesc, measures, keep.pred = TRUE, models = FALSE)
+# mtry has to be tuned
+
+rdesc = makeResampleDesc("Holdout")
+task = getOMLTask(task.ids.bmr3[6])
+task = convertOMLTaskToMlr(task)$mlr.task
+lrns_ranger = list(
+  makeLearner("classif.ranger", id = "ranger_22", par.vals = list(num.trees = 2000, num.threads = 10, respect.unordered.factors = "order"), predict.type = "prob"),
+  makeLearner("classif.ranger", id = "ranger_10", par.vals = list(num.trees = 2000, num.threads = 10, mtry = 10, respect.unordered.factors = "order"), predict.type = "prob"),
+  makeLearner("classif.ranger", id = "ranger_300", par.vals = list(num.trees = 2000, num.threads = 10, mtry = 300, respect.unordered.factors = "order"), predict.type = "prob"))
+  
+bmr = benchmark(lrns_ranger, task, rdesc, measures, keep.pred = TRUE, models = FALSE)
+
 
 # Analyse "strange" logloss results for ranger
 rdesc = makeResampleDesc("Holdout")
@@ -142,6 +159,10 @@ task = convertOMLTaskToMlr(task)$mlr.task
 bmr_tuneRF = benchmark(lrns[11:12], task, rdesc, measures, keep.pred = TRUE, models = FALSE)
 hist(sort(bmr_tuneRF$results$`blood-transfusion-service-center`$tuneRF$pred$data$prob.1))
 hist(sort(bmr_tuneRF$results$`blood-transfusion-service-center`$ranger$pred$data$prob.1), col = "red")
+
+load("./benchmark/bmr.RData")
+load("./benchmark/bmr_big.RData")
+bmr = c(bmr, bmr_big)
 
 library(mlr)
 # Data cleaning
@@ -363,21 +384,6 @@ mean(data[,2,1], na.rm = T)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # regression
 
 library(devtools)
@@ -416,16 +422,20 @@ configureMlr(on.learner.error = "warn")
 
 rdesc = makeResampleDesc("Holdout")
 
-namen = numeric(30)
-for(i in seq_along(task.ids.regr)[-1]) { # 38 datasets
+bmr_regr = list()
+for(i in seq_along(task.ids.regr)) { # 38 datasets
   print(i)
   set.seed(200 + i)
   task = getOMLTask(task.ids.regr[i])
   task = convertOMLTaskToMlr(task)$mlr.task
-  bmr_regr = benchmark(lrns, task, rdesc, measures, keep.pred = FALSE, models = FALSE)
+  bmr_regr[[i]] = benchmark(lrns, task, rdesc, measures, keep.pred = FALSE, models = FALSE)
   save(bmr_regr, file = "./benchmark/bmr_regr.RData")
 }
 bmr_regr
+
+load("./benchmark/bmr_regr.RData")
+
+
 # Anhang
 
 
