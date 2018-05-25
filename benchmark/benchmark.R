@@ -386,6 +386,7 @@ mean(data[,2,1], na.rm = T)
 
 # regression
 
+library(OpenML)
 library(devtools)
 load_all("../tuneRanger")
 
@@ -414,7 +415,20 @@ load("./benchmark/regression/regression_datasets_manual.RData")
 reg = reg[reg$number.of.instances >= 500, ]
 # 38 datasets
 reg$number.of.features
+# no high-dimensional
 task.ids.regr = reg$task.id
+
+time.estimate.regr = list()
+for(i in seq_along(task.ids.regr)) {
+  print(i)
+  task = getOMLTask(task.ids.regr[i])
+  task = convertOMLTaskToMlr(task)$mlr.task
+  time.estimate.regr[[i]] = estimateTimeTuneRanger(task, num.threads = 10, num.trees = 2000)
+  print(time.estimate.regr[[i]])
+  save(time.estimate.regr, file = "./benchmark/time.estimate.regr.RData")
+}
+load("./benchmark/time.estimate.regr.RData")
+
 
 rdesc = makeResampleDesc("RepCV", reps = 2, folds = 5)
 measures = list(mse, mae, medse, medae, rsq, kendalltau, spearmanrho, timetrain)
@@ -431,12 +445,59 @@ for(i in seq_along(task.ids.regr)) { # 38 datasets
   bmr_regr[[i]] = benchmark(lrns, task, rdesc, measures, keep.pred = FALSE, models = FALSE)
   save(bmr_regr, file = "./benchmark/bmr_regr.RData")
 }
-bmr_regr
+bmr_regr[1:3]
+unlist(time.estimate.regr)
 
 load("./benchmark/bmr_regr.RData")
 
 
+# Analysis of time
+
+bmr_regr
+# analcatdata: no results for tuning algorithms?
+# balloon: no results for tuning algorithms?
+# quake: rsq below zero?
+# maybe exclude visualizing_soil
+
+# for smaller datasets more repetitions for the CV, because unstable estimations?
+
+resi = list()
+resi[[1]] = data.frame(getBMRAggrPerformances(bmr_regr[[1]]))
+
+for(i in 2:length(bmr_regr)) {
+  resi[[i]] = data.frame(getBMRAggrPerformances(bmr_regr[[i]]))
+  # caret gets no result, if NA
+}
+
+lty.vec = c(rep(1,4), c(2,3,4,5))
+library(RColorBrewer)
+col.vec = brewer.pal(8, "Dark2")
+time = matrix(NA, length(bmr_regr),  ncol(resi[[1]]))
+for(i in seq_along(bmr_regr)) {
+  time[i,] = unlist(resi[[i]][8,])
+}
+time_order = order(time[,1])
+time = time[time_order,]
+plot(time[,1], type = "l", ylim = c(0, max(time, na.rm = T)), ylab = "Time in seconds", xlab = "Dataset number", col = col.vec[1])
+for(i in 2:ncol(time)){
+  points(1:length(bmr_regr), time[,i], col = col.vec[i], cex = 0.4)
+  lines(time[,i], col = col.vec[i], lty = lty.vec[i])
+}
+leg.names = c("tuneRangerMMCE", "tuneRangerAUC", "tuneRangerBrier", "tuneRangerLogloss", "mlrHyperopt", "caret", "tuneRF", "ranger default")
+legend("topleft", legend = leg.names, col = col.vec, lty = lty.vec)
+
+
+plot(time[,1], type = "l", ylim = c(0, max(c(time[,1],unlist(time.estimate.regr)) , na.rm = T)), ylab = "Time in seconds", xlab = "Dataset number", col = col.vec[1])
+lines(unlist(time.estimate.regr)[-38], col = "red")
 # Anhang
 
+plot((unlist(time.estimate.regr)[-38])/(time[,1]), ylim = c(0,5), type = "l")
+
+mean((unlist(time.estimate.regr)[-38])/(time[,1]), na.rm = T)
+
+sqrt(mean((time[,1] - unlist(time.estimate.regr)[-38])^2, na.rm = T))
+sqrt(mean((time[,1] - mean(time[,1], na.rm = T))^2, na.rm = T))
+dim(time)
+length(unlist(time.estimate.regr)[-38])
 
 

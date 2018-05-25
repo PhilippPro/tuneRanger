@@ -3,7 +3,7 @@
 #' Automatic tuning of random forests of the \code{\link[ranger]{ranger}} package with one line of code. 
 #'
 #' @param task The mlr task created by \code{\link[mlr]{makeClassifTask}} or \code{\link[mlr]{makeRegrTask}}. 
-#' @param measure Performance measure to evaluate. Default is auc for classification and mse for regression. Other possible performance measures can be looked up here: https://mlr-org.github.io/mlr-tutorial/release/html/performance/index.html
+#' @param measure Performance measure to evaluate/optimize. Default is brier score for classification and mse for regression. Can be changed to accuracy, AUC or logaritmic loss by setting it to \code{list(acc)}, \code{list(auc)} or \code{list(logloss)}. Other possible performance measures from mlr can be looked up here: \url{https://mlr-org.github.io/mlr-tutorial/release/html/performance/index.html}
 #' @param iters Number of iterations. Default is 70.
 #' @param iters.warmup Number of iterations for the warmup. Default is 30. 
 #' @param num.threads Number of threads. Default is number of CPUs available.
