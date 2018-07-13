@@ -12,6 +12,8 @@ The measure that should be optimized can be chosen from the list of measures in 
 
 The package is mainly based on [ranger](https://github.com/imbs-hl/ranger), [mlrMBO](http://mlr-org.github.io/mlrMBO/) and [mlr](https://github.com/mlr-org/mlr/#-machine-learning-in-r). 
 
+The package is also described in an arXiv-Paper: [https://arxiv.org/abs/1804.03515](https://arxiv.org/abs/1804.03515)
+
 ## Installation
 The development version
 
