@@ -36,6 +36,9 @@ The development version
     devtools::install_github("mlr-org/mlr")
     devtools::install_github("PhilippPro/tuneRanger")
     
+ CRAN
+
+    install.packages("tuneRanger")
     
 ## Usage
 Quickstart:
