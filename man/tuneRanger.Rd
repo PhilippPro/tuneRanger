@@ -43,7 +43,10 @@ Default is \code{TRUE}.}
 \item{show.info}{Verbose mlrMBO output on console? Default is \code{TRUE}.}
 }
 \value{
-list with recommended parameters and a data.frame with all evaluated hyperparameters and performance and time results for each run
+A list with elements
+  \item{\code{recommended.pars}}{Recommended hyperparameters.}
+  \item{\code{results}}{A data.frame with all evaluated hyperparameters and performance and time results for each run.}
+  \item{\code{model}}{The final model if \code{build.final.model} set to TRUE.}
 }
 \description{
 Automatic tuning of random forests of the \code{\link[ranger]{ranger}} package with one line of code.

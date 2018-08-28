@@ -14,7 +14,9 @@ restartTuneRanger(save.file.path = "optpath.RData", task, measure = NULL)
 \item{measure}{Performance measure that was already used in the original \code{\link{tuneRanger}} process.}
 }
 \value{
-list with recommended parameters and data.frame with all evaluated hyperparameters and performance and time results for each run. 
+A list with elements
+  \item{\code{recommended.pars}}{Recommended hyperparameters.}
+  \item{\code{results}}{A data.frame with all evaluated hyperparameters and performance and time results for each run.}
 No model is build.
 }
 \description{
