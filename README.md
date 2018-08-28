@@ -4,7 +4,7 @@
 Philipp Probst
 
 ## Description
-tuneRanger is a package for automatic tuning of random forests with one line of code and intended for users that are not very familiar with tuning strategies. 
+**tuneRanger** is a package for automatic tuning of random forests with one line of code and intended for users that are not very familiar with tuning strategies. 
 
 Model based optimization is used as tuning strategy and the three parameters min.node.size, sample.fraction and mtry are tuned at once. Out-of-bag predictions are used for evaluation, which makes it much faster than other packages and tuning strategies that use for example 5-fold cross-validation. Classification as well as regression is supported. 
 
@@ -17,7 +17,7 @@ The package is also described in an arXiv-Paper: [https://arxiv.org/abs/1804.035
 Please cite the paper, if you use the package:
 
 ```bibtex
-@ARTICLE{Probst2018,
+@ARTICLE{tuneRanger,
   author = {Probst, Philipp and Wright, Marvin and Boulesteix, Anne-Laure}, 
   title = {Hyperparameters and Tuning Strategies for Random Forest},
   journal = {ArXiv preprint arXiv:1804.03515},
