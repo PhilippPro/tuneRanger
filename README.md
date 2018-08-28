@@ -4,13 +4,31 @@
 Philipp Probst
 
 ## Description
-tuneRanger is a package for automatic tuning of random forests with one line of code and intended for users that are not very familiar with tuning strategies. 
+**tuneRanger** is a package for automatic tuning of random forests with one line of code and intended for users that are not very familiar with tuning strategies. 
 
 Model based optimization is used as tuning strategy and the three parameters min.node.size, sample.fraction and mtry are tuned at once. Out-of-bag predictions are used for evaluation, which makes it much faster than other packages and tuning strategies that use for example 5-fold cross-validation. Classification as well as regression is supported. 
 
 The measure that should be optimized can be chosen from the list of measures in mlr: http://mlr-org.github.io/mlr-tutorial/devel/html/measures/index.html
 
 The package is mainly based on [ranger](https://github.com/imbs-hl/ranger), [mlrMBO](http://mlr-org.github.io/mlrMBO/) and [mlr](https://github.com/mlr-org/mlr/#-machine-learning-in-r). 
+
+The package is also described in an arXiv-Paper: [https://arxiv.org/abs/1804.03515](https://arxiv.org/abs/1804.03515)
+
+Please cite the paper, if you use the package:
+
+```bibtex
+@ARTICLE{tuneRanger,
+  author = {Probst, Philipp and Wright, Marvin and Boulesteix, Anne-Laure}, 
+  title = {Hyperparameters and Tuning Strategies for Random Forest},
+  journal = {ArXiv preprint arXiv:1804.03515},
+  archivePrefix = "arXiv",
+  eprint = {1804.03515},
+  primaryClass = "stat.ML",
+  keywords = {Statistics - Machine Learning, Computer Science - Learning},
+  year = 2018,
+  url = {https://arxiv.org/abs/1804.03515}
+}
+```
 
 ## Installation
 The development version
