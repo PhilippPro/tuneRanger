@@ -16,7 +16,8 @@ The package is also described in an arXiv-Paper: [https://arxiv.org/abs/1804.035
 
 Please cite the paper, if you use the package:
 
-@ARTICLE{Probst20183,
+```bibtex
+@ARTICLE{Probst2018,
   author = {Probst, Philipp and Wright, Marvin and Boulesteix, Anne-Laure}, 
   title = {Hyperparameters and Tuning Strategies for Random Forest},
   journal = {ArXiv preprint arXiv:1804.03515},
@@ -27,6 +28,7 @@ Please cite the paper, if you use the package:
   year = 2018,
   url = {https://arxiv.org/abs/1804.03515}
 }
+```
 
 ## Installation
 The development version
