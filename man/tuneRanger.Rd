@@ -5,10 +5,11 @@
 \title{tuneRanger}
 \usage{
 tuneRanger(task, measure = NULL, iters = 70, iters.warmup = 30,
-  num.threads = NULL, num.trees = 1000, parameters = list(replace = FALSE,
-  respect.unordered.factors = "order"), tune.parameters = c("mtry",
-  "min.node.size", "sample.fraction"), save.file.path = NULL,
-  build.final.model = TRUE, show.info = getOption("mlrMBO.show.info", TRUE))
+  time.budget = NULL, num.threads = NULL, num.trees = 1000,
+  parameters = list(replace = FALSE, respect.unordered.factors = "order"),
+  tune.parameters = c("mtry", "min.node.size", "sample.fraction"),
+  save.file.path = NULL, build.final.model = TRUE,
+  show.info = getOption("mlrMBO.show.info", TRUE))
 }
 \arguments{
 \item{task}{The mlr task created by \code{\link[mlr]{makeClassifTask}} or \code{\link[mlr]{makeRegrTask}}.}
@@ -18,6 +19,8 @@ tuneRanger(task, measure = NULL, iters = 70, iters.warmup = 30,
 \item{iters}{Number of iterations. Default is 70.}
 
 \item{iters.warmup}{Number of iterations for the warmup. Default is 30.}
+
+\item{time.budget}{Running time budget in seconds. Note that the actual mbo run can take more time since the condition is checked after each iteration. The default NULL means: There is no time budget.}
 
 \item{num.threads}{Number of threads. Default is number of CPUs available.}
 

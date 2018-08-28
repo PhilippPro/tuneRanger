@@ -6,6 +6,7 @@
 #' @param measure Performance measure to evaluate/optimize. Default is brier score for classification and mse for regression. Can be changed to accuracy, AUC or logaritmic loss by setting it to \code{list(acc)}, \code{list(auc)} or \code{list(logloss)}. Other possible performance measures from mlr can be looked up here: \url{https://mlr-org.github.io/mlr-tutorial/release/html/performance/index.html}
 #' @param iters Number of iterations. Default is 70.
 #' @param iters.warmup Number of iterations for the warmup. Default is 30. 
+#' @param time.budget Running time budget in seconds. Note that the actual mbo run can take more time since the condition is checked after each iteration. The default NULL means: There is no time budget.
 #' @param num.threads Number of threads. Default is number of CPUs available.
 #' @param num.trees Number of trees.
 #' @param parameters Optional list of fixed named parameters that should be passed to \code{\link[ranger]{ranger}}.
@@ -47,7 +48,7 @@
 #' res$model
 #' # Prediction
 #' predict(res$model, newdata = iris[1:10,])}
-tuneRanger = function(task, measure = NULL, iters = 70, iters.warmup = 30, num.threads = NULL, num.trees = 1000, 
+tuneRanger = function(task, measure = NULL, iters = 70, iters.warmup = 30, time.budget = NULL, num.threads = NULL, num.trees = 1000, 
   parameters = list(replace = FALSE, respect.unordered.factors = "order"), 
   tune.parameters = c("mtry", "min.node.size", "sample.fraction"), save.file.path = NULL,
   build.final.model = TRUE, show.info = getOption("mlrMBO.show.info", TRUE)) {
@@ -143,7 +144,7 @@ tuneRanger = function(task, measure = NULL, iters = 70, iters.warmup = 30, num.t
   
   control = makeMBOControl(n.objectives = 1L, propose.points = mbo.prop.points, # impute.y.fun = function(x, y, opt.path) 0.7, 
     save.on.disk.at = save.on.disk.at, save.file.path = save.file.path)
-  control = setMBOControlTermination(control, max.evals = f.evals, iters = iters)
+  control = setMBOControlTermination(control, max.evals = f.evals, iters = iters, time.budget = time.budget)
   control = setMBOControlInfill(control, #opt = infill.opt,
     opt.focussearch.maxit = mbo.focussearch.maxit,
     opt.focussearch.points = mbo.focussearch.points,
