@@ -14,6 +14,20 @@ The package is mainly based on [ranger](https://github.com/imbs-hl/ranger), [mlr
 
 The package is also described in an arXiv-Paper: [https://arxiv.org/abs/1804.03515](https://arxiv.org/abs/1804.03515)
 
+Please cite the paper, if you use the package:
+
+@ARTICLE{Probst20183,
+  author = {Probst, Philipp and Wright, Marvin and Boulesteix, Anne-Laure}, 
+  title = {Hyperparameters and Tuning Strategies for Random Forest},
+  journal = {ArXiv preprint arXiv:1804.03515},
+  archivePrefix = "arXiv",
+  eprint = {1804.03515},
+  primaryClass = "stat.ML",
+  keywords = {Statistics - Machine Learning, Computer Science - Learning},
+  year = 2018,
+  url = {https://arxiv.org/abs/1804.03515}
+}
+
 ## Installation
 The development version
 
