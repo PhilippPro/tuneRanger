@@ -3,7 +3,7 @@
 #' Automatic tuning of random forests of the \code{\link[ranger]{ranger}} package with one line of code. 
 #'
 #' @param task The mlr task created by \code{\link[mlr]{makeClassifTask}} or \code{\link[mlr]{makeRegrTask}}. 
-#' @param measure Performance measure to evaluate/optimize. Default is brier score for classification and mse for regression. Can be changed to accuracy, AUC or logaritmic loss by setting it to \code{list(acc)}, \code{list(auc)} or \code{list(logloss)}. Other possible performance measures from mlr can be looked up here: \url{https://mlr-org.github.io/mlr-tutorial/release/html/performance/index.html}
+#' @param measure Performance measure to evaluate/optimize. Default is brier score for classification and mse for regression. Can be changed to accuracy, AUC or logaritmic loss by setting it to \code{list(acc)}, \code{list(auc)} or \code{list(logloss)}. Other possible performance measures from mlr can be looked up in the \href{https://mlr-org.github.io/mlr/articles/measures.html}{mlr tutorial}. 
 #' @param iters Number of iterations. Default is 70.
 #' @param iters.warmup Number of iterations for the warmup. Default is 30. 
 #' @param time.budget Running time budget in seconds. Note that the actual mbo run can take more time since the condition is checked after each iteration. The default NULL means: There is no time budget.
@@ -27,7 +27,7 @@
 #'   \item{\code{results}}{A data.frame with all evaluated hyperparameters and performance and time results for each run.}
 #'   \item{\code{model}}{The final model if \code{build.final.model} set to TRUE.}
 #' @details Model based optimization is used as tuning strategy and the three parameters min.node.size, sample.fraction and mtry are tuned at once. Out-of-bag predictions are used for evaluation, which makes it much faster than other packages and tuning strategies that use for example 5-fold cross-validation. Classification as well as regression is supported. 
-#' The measure that should be optimized can be chosen from the list of measures in mlr: http://mlr-org.github.io/mlr-tutorial/devel/html/measures/index.html
+#' The measure that should be optimized can be chosen from the list of measures in mlr: \href{https://mlr-org.github.io/mlr/articles/measures.html}{mlr tutorial}
 #' @seealso \code{\link{estimateTimeTuneRanger}} for time estimation and \code{\link{restartTuneRanger}} for continuing the algorithm if there was an error. 
 #' @export
 #' @examples 

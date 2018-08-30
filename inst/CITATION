@@ -1,0 +1,15 @@
+bref = c(
+  bibentry(
+    bibtype = "Article",
+    key = "tuneRanger",
+    title = "Hyperparameters and Tuning Strategies for Random Forest",
+    author = c(
+      person("Philipp", "Probst"),
+      person("Marvin", "Wright"),
+      person("Anne-Laure", "Boulesteix")
+    ),
+    journal = "ArXiv preprint arXiv:1804.03515",
+    year = 2018L,
+    url = "https://arxiv.org/abs/1804.03515"
+)
+)

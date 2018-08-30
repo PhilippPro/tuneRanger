@@ -14,7 +14,7 @@ tuneRanger(task, measure = NULL, iters = 70, iters.warmup = 30,
 \arguments{
 \item{task}{The mlr task created by \code{\link[mlr]{makeClassifTask}} or \code{\link[mlr]{makeRegrTask}}.}
 
-\item{measure}{Performance measure to evaluate/optimize. Default is brier score for classification and mse for regression. Can be changed to accuracy, AUC or logaritmic loss by setting it to \code{list(acc)}, \code{list(auc)} or \code{list(logloss)}. Other possible performance measures from mlr can be looked up here: \url{https://mlr-org.github.io/mlr-tutorial/release/html/performance/index.html}}
+\item{measure}{Performance measure to evaluate/optimize. Default is brier score for classification and mse for regression. Can be changed to accuracy, AUC or logaritmic loss by setting it to \code{list(acc)}, \code{list(auc)} or \code{list(logloss)}. Other possible performance measures from mlr can be looked up in the \href{https://mlr-org.github.io/mlr/articles/measures.html}{mlr tutorial}.}
 
 \item{iters}{Number of iterations. Default is 70.}
 
@@ -53,7 +53,7 @@ Automatic tuning of random forests of the \code{\link[ranger]{ranger}} package w
 }
 \details{
 Model based optimization is used as tuning strategy and the three parameters min.node.size, sample.fraction and mtry are tuned at once. Out-of-bag predictions are used for evaluation, which makes it much faster than other packages and tuning strategies that use for example 5-fold cross-validation. Classification as well as regression is supported. 
-The measure that should be optimized can be chosen from the list of measures in mlr: http://mlr-org.github.io/mlr-tutorial/devel/html/measures/index.html
+The measure that should be optimized can be chosen from the list of measures in mlr: \href{https://mlr-org.github.io/mlr/articles/measures.html}{mlr tutorial}
 }
 \examples{
 \dontrun{
