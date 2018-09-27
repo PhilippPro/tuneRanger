@@ -7,6 +7,7 @@ makeRLearner.classif.tuneRanger = function() {
       makeUntypedLearnerParam(id = "measure", default = multiclass.brier),
       makeIntegerLearnerParam(id = "iters", lower = 1L, default = 70L),
       makeIntegerLearnerParam(id = "iters.warmup", lower = 1L, default = 30L),
+      makeNumericLearnerParam(id = "time.budget", lower = 1L),
       makeIntegerLearnerParam(id = "num.threads", lower = 1L, when = "both", tunable = FALSE),
       makeIntegerLearnerParam(id = "num.trees", lower = 1L, default = 500L),
       makeUntypedLearnerParam(id = "tune.parameters", default = c("mtry", "min.node.size", "sample.fraction")),
