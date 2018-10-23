@@ -22,6 +22,7 @@ makeRLearner.classif.hyperoptRanger = function() {
     cl = "classif.hyperoptRanger",
     package = "mlrHyperopt",
     par.set = makeParamSet(
+      makeUntypedLearnerParam("hyper.control", default = NULL)
     ),
     properties = c("twoclass", "multiclass", "prob", "numerics", "factors", "ordered", "featimp", "weights"),
     name = "Random Forests",
@@ -31,7 +32,7 @@ makeRLearner.classif.hyperoptRanger = function() {
 }
 
 trainLearner.classif.hyperoptRanger = function(.learner, .task, .subset, .weights = NULL, ...) {
-  res = hyperopt(.task, learner = "classif.ranger", par.config = par.config.mlrHyperopt)
+  res = hyperopt(.task, learner = "classif.ranger", par.config = par.config.mlrHyperopt, ... )
   lrn = setPredictType(res$learner, .learner$predict.type)
   mlr::train(lrn, .task, subset = .subset, weights = .weights)
 }

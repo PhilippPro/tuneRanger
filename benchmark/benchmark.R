@@ -1,3 +1,6 @@
+library(checkpoint)
+checkpoint("2018-10-04", project = dir)
+
 library(devtools)
 library(OpenML)
 load_all("../tuneRanger")
