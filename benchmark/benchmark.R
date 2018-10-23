@@ -46,7 +46,7 @@ bmr1 = benchmark(lrns, iris.task, rdesc, measures)
 library(OpenML)
 #task.ids = listOMLTasks(number.of.classes = 2L, number.of.missing.values = 0, tag = "OpenML100", estimation.procedure = "10-fold Crossvalidation")$task.id
 #save(task.ids, file = "./benchmark/task_ids.RData")
-
+load("./benchmark/task_ids.RData")
 # time estimation
 time.estimate = list()
 for(i in seq_along(task.ids)) {
@@ -71,7 +71,6 @@ configureMlr(on.learner.error = "warn")
 task.ids.bmr = task.ids[which((unlist(time.estimate)-100)<60)]
 cbind(time.estimate, (unlist(time.estimate)-100)<60)
 unlist(time.estimate)[which((unlist(time.estimate)-100)<60)]
-tasks[which((unlist(time.estimate)-100)<60),]
 
 for(i in seq_along(task.ids.bmr)) { # 13 datasets
   print(i)
