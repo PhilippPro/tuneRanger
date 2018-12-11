@@ -19,7 +19,7 @@ lrns = list(
 )
 rdesc <- makeResampleDesc("CV", iters= 5)
 
-for(i in c(1:nrow(reg))[-c(1:28)]) {
+for(i in c(1:nrow(reg))[-c(2,28)]) {
   print(i)
   task <- convertOMLTaskToMlr(getOMLTask(task.id = reg$task.id[i]))$mlr.task
   set.seed(i + 321)
