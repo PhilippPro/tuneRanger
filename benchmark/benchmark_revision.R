@@ -43,7 +43,7 @@ set.seed(126)
 bmr_rev1 = benchmark(lrns, iris.task, rdesc, measures)
 
 library(OpenML)
-load("./benchmark/time.estimate.RData")
+load("./benchmark/data/time.estimate.RData")
 rdesc = makeResampleDesc("RepCV", reps = 10, folds = 5)
 measures = list(mmce, multiclass.au1p, multiclass.brier, logloss, timetrain)
 # benchmark
@@ -65,9 +65,9 @@ for(i in seq_along(task.ids.bmr_rev)) { # 13 datasets
   task = getOMLTask(task.ids.bmr_rev[i])
   task = convertOMLTaskToMlr(task)$mlr.task
   bmr_rev[[i]] = benchmark(lrns, task, rdesc, measures, keep.pred = FALSE, models = FALSE)
-  save(bmr_rev, file = "./benchmark/bmr_rev.RData")
+  save(bmr_rev, file = "./benchmark/data/bmr_rev.RData")
 }
-load("./benchmark/bmr_rev.RData")
+load("./benchmark/data/bmr_rev.RData")
 # Which datasets are not super easy (AUC < 0.99) and discriminate between the algorithms?
 
 # medium datasets (between 160 seconds and 10 minutes)
@@ -81,9 +81,9 @@ for(i in seq_along(task.ids.bmr_rev2)) {
   task = getOMLTask(task.ids.bmr_rev2[i])
   task = convertOMLTaskToMlr(task)$mlr.task
   bmr_rev[[length(bmr_rev) + 1]] = benchmark(lrns, task, rdesc, measures, keep.pred = FALSE, models = FALSE)
-  save(bmr_rev, file = "./benchmark/bmr_rev.RData")
+  save(bmr_rev, file = "./benchmark/data/bmr_rev.RData")
 }
-load("./benchmark/bmr_rev.RData")
+load("./benchmark/data/bmr_rev.RData")
 
 # big datasets (between 10 minutes and 1 hour)
 task.ids.bmr_rev3 = task.ids[which((unlist(time.estimate))>600 & (unlist(time.estimate))<3600)]
@@ -100,9 +100,9 @@ for(i in seq_along(task.ids.bmr_rev3)) {
   task = getOMLTask(task.ids.bmr_rev3[i])
   task = convertOMLTaskToMlr(task)$mlr.task
   bmr_rev_big[[length(bmr_rev_big) + 1]] = benchmark(lrns, task, rdesc, measures, keep.pred = FALSE, models = FALSE)
-  save(bmr_rev_big, file = "./benchmark/bmr_rev_big.RData")
+  save(bmr_rev_big, file = "./benchmark/data/bmr_rev_big.RData")
 }
-load("./benchmark/bmr_rev_big.RData")
+load("./benchmark/data/bmr_rev_big.RData")
 
 # Very big datasets, 4 datasets
 tasks4 = tasks[which((unlist(time.estimate))>=3600),]
@@ -115,8 +115,8 @@ for(i in seq_along(task.ids.bmr_rev4)) {
   task = getOMLTask(task.ids.bmr_rev4[i])
   task = convertOMLTaskToMlr(task)$mlr.task
   bmr_rev_big[[length(bmr_rev_big) + 1]] = benchmark(lrns, task, rdesc, measures, keep.pred = FALSE, models = FALSE)
-  save(bmr_rev_big, file = "./benchmark/bmr_rev_big.RData")
+  save(bmr_rev_big, file = "./benchmark/data/bmr_rev_big.RData")
 }
-load("./benchmark/bmr_rev_big.RData")
+load("./benchmark/data/bmr_rev_big.RData")
 
 

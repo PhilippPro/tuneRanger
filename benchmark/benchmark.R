@@ -45,8 +45,8 @@ bmr1 = benchmark(lrns, iris.task, rdesc, measures)
 
 library(OpenML)
 #task.ids = listOMLTasks(number.of.classes = 2L, number.of.missing.values = 0, tag = "OpenML100", estimation.procedure = "10-fold Crossvalidation")$task.id
-#save(task.ids, file = "./benchmark/task_ids.RData")
-load("./benchmark/task_ids.RData")
+#save(task.ids, file = "./benchmark/data/task_ids.RData")
+load("./benchmark/data/task_ids.RData")
 # time estimation
 time.estimate = list()
 for(i in seq_along(task.ids)) {
@@ -413,7 +413,7 @@ lrns = list(
 )
 
 
-load("./benchmark/regression/regression_datasets_manual.RData")
+load("./benchmark/data/regression_datasets_manual.RData")
 reg = reg[reg$number.of.instances >= 500, ]
 # 38 datasets
 reg$number.of.features
@@ -427,9 +427,9 @@ for(i in seq_along(task.ids.regr)) {
   task = convertOMLTaskToMlr(task)$mlr.task
   time.estimate.regr[[i]] = estimateTimeTuneRanger(task, num.threads = 10, num.trees = 2000)
   print(time.estimate.regr[[i]])
-  save(time.estimate.regr, file = "./benchmark/time.estimate.regr.RData")
+  save(time.estimate.regr, file = "./benchmark/data/time.estimate.regr.RData")
 }
-load("./benchmark/time.estimate.regr.RData")
+load("./benchmark/data/time.estimate.regr.RData")
 
 
 rdesc = makeResampleDesc("RepCV", reps = 2, folds = 5)
@@ -445,12 +445,12 @@ for(i in seq_along(task.ids.regr)) { # 38 datasets
   task = getOMLTask(task.ids.regr[i])
   task = convertOMLTaskToMlr(task)$mlr.task
   bmr_regr[[i]] = benchmark(lrns, task, rdesc, measures, keep.pred = FALSE, models = FALSE)
-  save(bmr_regr, file = "./benchmark/bmr_regr.RData")
+  save(bmr_regr, file = "./benchmark/data/bmr_regr.RData")
 }
 bmr_regr[1:3]
 unlist(time.estimate.regr)
 
-load("./benchmark/bmr_regr.RData")
+load("./benchmark/data/bmr_regr.RData")
 
 
 # Analysis of time
