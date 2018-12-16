@@ -4,7 +4,7 @@
 Philipp Probst
 
 ## Description
-**tuneRanger** is a package for automatic tuning of random forests with one line of code and intended for users that are not very familiar with tuning strategies. 
+**tuneRanger** is a package for automatic tuning of random forests with one line of code and intended for users that want to get the best out of their random forest model. 
 
 Model based optimization is used as tuning strategy and the three parameters min.node.size, sample.fraction and mtry are tuned at once. Out-of-bag predictions are used for evaluation, which makes it much faster than other packages and tuning strategies that use for example 5-fold cross-validation. Classification as well as regression is supported. 
 
