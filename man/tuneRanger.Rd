@@ -6,9 +6,9 @@
 \usage{
 tuneRanger(task, measure = NULL, iters = 70, iters.warmup = 30,
   time.budget = NULL, num.threads = NULL, num.trees = 1000,
-  parameters = list(replace = FALSE, respect.unordered.factors = "order"),
-  tune.parameters = c("mtry", "min.node.size", "sample.fraction"),
-  save.file.path = NULL, build.final.model = TRUE,
+  parameters = list(replace = FALSE, respect.unordered.factors =
+  "order"), tune.parameters = c("mtry", "min.node.size",
+  "sample.fraction"), save.file.path = NULL, build.final.model = TRUE,
   show.info = getOption("mlrMBO.show.info", TRUE))
 }
 \arguments{
@@ -53,7 +53,7 @@ Automatic tuning of random forests of the \code{\link[ranger]{ranger}} package w
 }
 \details{
 Model based optimization is used as tuning strategy and the three parameters min.node.size, sample.fraction and mtry are tuned at once. Out-of-bag predictions are used for evaluation, which makes it much faster than other packages and tuning strategies that use for example 5-fold cross-validation. Classification as well as regression is supported. 
-The measure that should be optimized can be chosen from the list of measures in mlr: \href{https://mlr-org.github.io/mlr/articles/measures.html}{mlr tutorial}
+The measure that should be optimized can be chosen from the list of measures in mlr: \href{https://mlr.mlr-org.com/articles/tutorial/measures.html}{mlr tutorial}
 }
 \examples{
 \dontrun{

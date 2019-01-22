@@ -27,7 +27,7 @@
 #'   \item{\code{results}}{A data.frame with all evaluated hyperparameters and performance and time results for each run.}
 #'   \item{\code{model}}{The final model if \code{build.final.model} set to TRUE.}
 #' @details Model based optimization is used as tuning strategy and the three parameters min.node.size, sample.fraction and mtry are tuned at once. Out-of-bag predictions are used for evaluation, which makes it much faster than other packages and tuning strategies that use for example 5-fold cross-validation. Classification as well as regression is supported. 
-#' The measure that should be optimized can be chosen from the list of measures in mlr: \href{https://mlr-org.github.io/mlr/articles/measures.html}{mlr tutorial}
+#' The measure that should be optimized can be chosen from the list of measures in mlr: \href{https://mlr.mlr-org.com/articles/tutorial/measures.html}{mlr tutorial}
 #' @seealso \code{\link{estimateTimeTuneRanger}} for time estimation and \code{\link{restartTuneRanger}} for continuing the algorithm if there was an error. 
 #' @export
 #' @examples 
