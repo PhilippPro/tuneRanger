@@ -14,21 +14,6 @@ The package is mainly based on [ranger](https://github.com/imbs-hl/ranger), [mlr
 
 The package is also described in an arXiv-Paper: [https://arxiv.org/abs/1804.03515](https://arxiv.org/abs/1804.03515)
 
-Please cite the paper, if you use the package:
-
-```bibtex
-@ARTICLE{tuneRanger,
-  author = {Probst, Philipp and Wright, Marvin and Boulesteix, Anne-Laure}, 
-  title = {Hyperparameters and Tuning Strategies for Random Forest},
-  journal = {ArXiv preprint arXiv:1804.03515},
-  archivePrefix = "arXiv",
-  eprint = {1804.03515},
-  primaryClass = "stat.ML",
-  keywords = {Statistics - Machine Learning, Computer Science - Learning},
-  year = 2018,
-  url = {https://arxiv.org/abs/1804.03515}
-}
-```
 
 ## Installation
 The development version
@@ -65,3 +50,25 @@ Quickstart:
 
     # Restart after failing in one of the iterations:
     res = restartTuneRanger("./optpath.RData", iris.task, measure = list(multiclass.brier))
+
+## Benchmark
+
+![alt text](https://github.com/PhilippPro/tuneRanger/blob/master/benchmark/figure/rsq_results.pdf)
+
+## How to cite
+
+Please cite the paper, if you use the package:
+
+```bibtex
+@ARTICLE{tuneRanger,
+  author = {Probst, Philipp and Wright, Marvin and Boulesteix, Anne-Laure}, 
+  title = {Hyperparameters and Tuning Strategies for Random Forest},
+  journal = {ArXiv preprint arXiv:1804.03515},
+  archivePrefix = "arXiv",
+  eprint = {1804.03515},
+  primaryClass = "stat.ML",
+  keywords = {Statistics - Machine Learning, Computer Science - Learning},
+  year = 2018,
+  url = {https://arxiv.org/abs/1804.03515}
+}
+```
