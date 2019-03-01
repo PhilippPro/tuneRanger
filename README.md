@@ -18,7 +18,7 @@ The package is also described in an arXiv-Paper: [https://arxiv.org/abs/1804.035
 ## Benchmark
 You can see a benchmark in the [paper](https://arxiv.org/abs/1804.03515). 
 
-Moreover, for regression I compared three different tuning implementations (**tuneRanger**, (autoxgboost)[https://github.com/ja-thomas/autoxgboost] and (liquidSVM)[https://github.com/liquidSVM/liquidSVM] on 29 regression tasks. 
+Moreover, for regression I compared three different tuning implementations (**tuneRanger**, [autoxgboost](https://github.com/ja-thomas/autoxgboost) and [liquidSVM](https://github.com/liquidSVM/liquidSVM) on 29 regression tasks. 
 in their default mode and the default of **ranger**. The results show the competitiveness of **tuneRanger** and can be seen in the following graphs:
 
 ![R-Squared](https://github.com/PhilippPro/tuneRanger/blob/master/benchmark/figure/rsq_results.pdf)
