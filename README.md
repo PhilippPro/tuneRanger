@@ -15,6 +15,20 @@ The package is mainly based on [ranger](https://github.com/imbs-hl/ranger), [mlr
 The package is also described in an arXiv-Paper: [https://arxiv.org/abs/1804.03515](https://arxiv.org/abs/1804.03515)
 
 
+## Benchmark
+You can see a benchmark in the [paper](https://arxiv.org/abs/1804.03515). 
+
+Moreover, for regression I compared three different tuning implementations (**tuneRanger**, (autoxgboost)[https://github.com/ja-thomas/autoxgboost] and (liquidSVM)[https://github.com/liquidSVM/liquidSVM] on 29 regression tasks. 
+in their default mode and the default of **ranger**. The results show the competitiveness of **tuneRanger** and can be seen in the following graphs:
+
+![R-Squared](https://github.com/PhilippPro/tuneRanger/blob/master/benchmark/figure/rsq_results.pdf)
+
+![Spearmans-Rho](https://github.com/PhilippPro/tuneRanger/blob/master/benchmark/figure/spearman_results.pdf)
+
+![Training time](https://github.com/PhilippPro/tuneRanger/blob/master/benchmark/figure/time_results.pdf)
+
+A disadvantage is the long runtime (e.g. compared to liquidSVM), improvements could be made on this issue.
+
 ## Installation
 The development version
 
@@ -51,23 +65,7 @@ Quickstart:
     # Restart after failing in one of the iterations:
     res = restartTuneRanger("./optpath.RData", iris.task, measure = list(multiclass.brier))
 
-## Benchmark
-
-You can see a benchmark in the [paper](https://arxiv.org/abs/1804.03515). 
-
-Moreover, for regression I compared three different tuning implementations (**tuneRanger**, (autoxgboost)[https://github.com/ja-thomas/autoxgboost] and (liquidSVM)[https://github.com/liquidSVM/liquidSVM] on 29 regression tasks. 
-in their default mode and the default of **ranger**. The results show the competitiveness of **tuneRanger** and can be seen in the following graphs:
-
-![R-Squared](https://github.com/PhilippPro/tuneRanger/blob/master/benchmark/figure/rsq_results.pdf)
-![Spearmans-Rho](https://github.com/PhilippPro/tuneRanger/blob/master/benchmark/figure/spearman_results.pdf)
-![Training time](https://github.com/PhilippPro/tuneRanger/blob/master/benchmark/figure/time_results.pdf)
-
-<img align="center" src="hhttps://github.com/PhilippPro/tuneRanger/blob/master/benchmark/figure/rsq_results.pdf" width="1000px">
-
-A disadvantage is the long runtime (e.g. compared to liquidSVM), improvements could be made on this issue.
-
 ## How to cite
-
 Please cite the paper, if you use the package:
 
 ```bibtex
