@@ -3,6 +3,15 @@
 
 Philipp Probst
 
+## Installation
+The development version
+
+    devtools::install_github("PhilippPro/tuneRanger")
+    
+ CRAN
+
+    install.packages("tuneRanger")
+
 ## Description
 **tuneRanger** is a package for automatic tuning of random forests with one line of code and intended for users that want to get the best out of their random forest model. 
 
@@ -13,7 +22,6 @@ The measure that should be optimized can be chosen from the list of measures in 
 The package is mainly based on [ranger](https://github.com/imbs-hl/ranger), [mlrMBO](http://mlr-org.github.io/mlrMBO/) and [mlr](https://github.com/mlr-org/mlr/#-machine-learning-in-r). 
 
 The package is also described in an arXiv-Paper: [https://arxiv.org/abs/1804.03515](https://arxiv.org/abs/1804.03515)
-
 
 ## Benchmark
 You can see a benchmark in the [paper](https://arxiv.org/abs/1804.03515). 
@@ -28,16 +36,6 @@ in their default mode and the default of **ranger**. The results show the compet
 ![Training time](https://github.com/PhilippPro/tuneRanger/blob/master/benchmark/figure/time_results.pdf)
 
 A disadvantage is the long runtime (e.g. compared to liquidSVM), improvements could be made on this issue.
-
-## Installation
-The development version
-
-    devtools::install_github("mlr-org/mlr")
-    devtools::install_github("PhilippPro/tuneRanger")
-    
- CRAN
-
-    install.packages("tuneRanger")
     
 ## Usage
 Quickstart:
