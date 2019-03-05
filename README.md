@@ -37,6 +37,8 @@ The results of the [5-fold cross-validation](https://github.com/PhilippPro/tuneR
 
 A disadvantage is the long runtime (e.g. compared to liquidSVM), improvements could be made on this issue.
     
+Code for the two benchmarks is available [here](https://github.com/PhilippPro/tuneRanger/blob/master/benchmark/benchmark.R) and [here](https://github.com/PhilippPro/tuneRanger/blob/master/benchmark/benchmark_regression.R).
+
 ## Usage
 Quickstart:
 
