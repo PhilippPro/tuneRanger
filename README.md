@@ -3,6 +3,15 @@
 
 Philipp Probst
 
+## Installation
+The development version
+
+    devtools::install_github("PhilippPro/tuneRanger")
+    
+ CRAN
+
+    install.packages("tuneRanger")
+
 ## Description
 **tuneRanger** is a package for automatic tuning of random forests with one line of code and intended for users that want to get the best out of their random forest model. 
 
@@ -14,32 +23,22 @@ The package is mainly based on [ranger](https://github.com/imbs-hl/ranger), [mlr
 
 The package is also described in an arXiv-Paper: [https://arxiv.org/abs/1804.03515](https://arxiv.org/abs/1804.03515)
 
-Please cite the paper, if you use the package:
+## Benchmark
+You can see a benchmark for classification in the [paper](https://arxiv.org/abs/1804.03515). 
 
-```bibtex
-@ARTICLE{tuneRanger,
-  author = {Probst, Philipp and Wright, Marvin and Boulesteix, Anne-Laure}, 
-  title = {Hyperparameters and Tuning Strategies for Random Forest},
-  journal = {ArXiv preprint arXiv:1804.03515},
-  archivePrefix = "arXiv",
-  eprint = {1804.03515},
-  primaryClass = "stat.ML",
-  keywords = {Statistics - Machine Learning, Computer Science - Learning},
-  year = 2018,
-  url = {https://arxiv.org/abs/1804.03515}
-}
-```
+Moreover, for regression I compared three different tuning implementations (**tuneRanger**, [autoxgboost](https://github.com/ja-thomas/autoxgboost) and [liquidSVM](https://github.com/liquidSVM/liquidSVM) on 29 regression tasks in their default mode and the default of **ranger**. 
+The results of the [5-fold cross-validation](https://github.com/PhilippPro/tuneRanger/blob/master/benchmark/benchmark_regression.R) show the competitiveness of **tuneRanger** and can be seen in the following graphs:
 
-## Installation
-The development version
+![R-Squared](https://github.com/PhilippPro/tuneRanger/blob/master/benchmark/figure/rsq_results.pdf)
 
-    devtools::install_github("mlr-org/mlr")
-    devtools::install_github("PhilippPro/tuneRanger")
+![Spearmans-Rho](https://github.com/PhilippPro/tuneRanger/blob/master/benchmark/figure/spearman_results.pdf)
+
+![Training time](https://github.com/PhilippPro/tuneRanger/blob/master/benchmark/figure/time_results.pdf)
+
+A disadvantage is the long runtime (e.g. compared to liquidSVM), improvements could be made on this issue.
     
- CRAN
+Code for the two benchmarks is available [here](https://github.com/PhilippPro/tuneRanger/blob/master/benchmark/benchmark.R) and [here](https://github.com/PhilippPro/tuneRanger/blob/master/benchmark/benchmark_regression.R).
 
-    install.packages("tuneRanger")
-    
 ## Usage
 Quickstart:
 
@@ -65,3 +64,20 @@ Quickstart:
 
     # Restart after failing in one of the iterations:
     res = restartTuneRanger("./optpath.RData", iris.task, measure = list(multiclass.brier))
+
+## How to cite
+Please cite the paper, if you use the package:
+
+```bibtex
+@ARTICLE{tuneRanger,
+  author = {Probst, Philipp and Wright, Marvin and Boulesteix, Anne-Laure}, 
+  title = {Hyperparameters and Tuning Strategies for Random Forest},
+  journal = {ArXiv preprint arXiv:1804.03515},
+  archivePrefix = "arXiv",
+  eprint = {1804.03515},
+  primaryClass = "stat.ML",
+  keywords = {Statistics - Machine Learning, Computer Science - Learning},
+  year = 2018,
+  url = {https://arxiv.org/abs/1804.03515}
+}
+```
