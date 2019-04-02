@@ -8,8 +8,9 @@ bref = c(
       person("Marvin", "Wright"),
       person("Anne-Laure", "Boulesteix")
     ),
-    journal = "ArXiv preprint arXiv:1804.03515",
+    journal = "Wiley Interdisciplinary Reviews: Data Mining and Knowledge Discovery",
     year = 2018L,
-    url = "https://arxiv.org/abs/1804.03515"
+    doi = "10.1002/widm.1301",
+    publisher = "Wiley Online Library"
 )
 )
