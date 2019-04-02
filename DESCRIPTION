@@ -2,7 +2,7 @@ Package: tuneRanger
 Type: Package
 Title: Tune Random Forest of the 'ranger' Package
 Description: Tuning random forest with one line. The package is mainly based on the packages 'ranger' and 'mlrMBO'.
-Version: 0.4
+Version: 0.5
 Authors@R: c(
     person("Philipp", "Probst", email = "philipp_probst@gmx.de", role = c("aut", "cre")),
     person("Simon", "Klau", email = "simonklau@ibe.med.uni-muenchen.de", role = "ctb"))
@@ -26,5 +26,4 @@ LazyData: yes
 ByteCompile: yes
 Date: 2019-01-22
 RoxygenNote: 6.1.1
-Suggests:
-    testthat
+Suggests: survival, testthat
