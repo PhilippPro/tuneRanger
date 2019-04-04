@@ -26,7 +26,7 @@ makeRLearner.surv.tuneMtryFast = function() {
       makeIntegerLearnerParam(id = "num.random.splits", lower = 1L, default = 1L, requires = quote(splitrule == "extratrees")),
       makeLogicalLearnerParam(id = "keep.inbag", default = FALSE, tunable = FALSE)
     ),
-    properties = c("numerics", "factors", "ordered",  "weights"),
+    properties = c("numerics", "factors", "ordered",  "weights", "prob"),
     name = "tuneMtryFast for ranger",
     short.name = "tuneMtryFast",
     note = ""
@@ -44,6 +44,16 @@ trainLearner.surv.tuneMtryFast = function(.learner, .task, .subset, .weights = N
 
 #' @export
 predictLearner.surv.tuneMtryFast = function(.learner, .model, .newdata, ...) {
-  p = predict(object = .model$learner.model, data = .newdata)
-  rowMeans(p$chf)
+  if (predict.type == "response") {
+    p = predict(object = .model$learner.model, data = .newdata)
+    rowMeans(p$chf)
+  } else {
+    p = predict(object = .model$learner.model, data = .newdata)
+    preds = rowMeans(p$chf)
+    train.times = sort(unique(c(0, .model$learner.model$times)))
+    ptemp = p$survival
+    pos = prodlim::sindex(jump.times = p$unique.death.times, eval.times = train.times)
+    probs = cbind(1, ptemp)[, pos + 1, drop = FALSE]
+    list(preds = preds, probs = probs, train.times = train.times)
+  }
 }
