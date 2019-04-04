@@ -35,9 +35,9 @@ makeRLearner.regr.tuneMtryFast = function() {
 
 #' @export
 trainLearner.regr.tuneMtryFast = function(.learner, .task, .subset, .weights = NULL, classwt = NULL, cutoff, ...) {
-  f = getTaskFormula(.task)
   data = getTaskData(.task, .subset)
-  tuneRanger::tuneMtryFast(formula = f, data = data, num.treesTry = 50, doBest = TRUE, case.weights = .weights, ...)
+  tn = getTaskTargetNames(.task)
+  tuneRanger::tuneMtryFast(formula = NULL, data = data, dependent.variable.name = tn, num.treesTry = 50, doBest = TRUE, case.weights = .weights, ...)
 }
 
 #' @export

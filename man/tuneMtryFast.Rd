@@ -4,14 +4,17 @@
 \alias{tuneMtryFast}
 \title{tuneMtryFast}
 \usage{
-tuneMtryFast(formula, data, mtryStart = floor(sqrt(ncol(data) - 1)),
-  num.treesTry = 50, stepFactor = 2, improve = 0.05, trace = TRUE,
-  plot = TRUE, doBest = FALSE, ...)
+tuneMtryFast(formula = NULL, data = NULL,
+  dependent.variable.name = NULL, mtryStart = floor(sqrt(ncol(data) -
+  1)), num.treesTry = 50, stepFactor = 2, improve = 0.05,
+  trace = TRUE, plot = TRUE, doBest = FALSE, ...)
 }
 \arguments{
 \item{formula}{Object of class formula or character describing the model to fit. Interaction terms supported only for numerical variables.}
 
 \item{data}{Training data of class data.frame, matrix, dgCMatrix (Matrix) or gwaa.data (GenABEL).}
+
+\item{dependent.variable.name}{Name of dependent variable, needed if no formula given. For survival forests this is the time variable.}
 
 \item{mtryStart}{starting value of mtry; default is the same as in \code{\link[ranger]{ranger}}}
 

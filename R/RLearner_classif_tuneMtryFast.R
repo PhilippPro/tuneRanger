@@ -35,9 +35,9 @@ makeRLearner.classif.tuneMtryFast = function() {
 
 #' @export
 trainLearner.classif.tuneMtryFast = function(.learner, .task, .subset, .weights = NULL, classwt = NULL, cutoff, ...) {
-  f = getTaskFormula(.task)
   data = getTaskData(.task, .subset, recode.target = "drop.levels")
-  tuneRanger::tuneMtryFast(formula = f, data = data, num.treesTry = 50, doBest = TRUE, probability = (.learner$predict.type == "prob"), case.weights = .weights, ...)
+  tn = getTaskTargetNames(.task)
+  tuneRanger::tuneMtryFast(formula = NULL, data = data, dependent.variable.name = tn, num.treesTry = 50, doBest = TRUE, probability = (.learner$predict.type == "prob"), case.weights = .weights, ...)
 }
 
 #' @export

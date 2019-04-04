@@ -35,25 +35,13 @@ makeRLearner.surv.tuneMtryFast = function() {
 
 #' @export
 trainLearner.surv.tuneMtryFast = function(.learner, .task, .subset, .weights = NULL, classwt = NULL, cutoff, ...) {
-  f = getTaskFormula(.task)
-  target = getTaskTargetNames(.task)
-  f = sprintf("Surv(%s, %s) ~ .", target[1L], target[2L])
   data = getTaskData(.task, .subset)
-  tuneRanger::tuneMtryFast(formula = f, data = data, num.treesTry = 50, doBest = TRUE, case.weights = .weights, ...)
+  tn = getTaskTargetNames(.task)
+  tuneRanger::tuneMtryFast(formula = NULL, data = data, dependent.variable.name = tn[1L], status.variable.name = tn[2L], num.treesTry = 50, doBest = TRUE, case.weights = .weights, ...)
 }
 
 #' @export
 predictLearner.surv.tuneMtryFast = function(.learner, .model, .newdata, ...) {
-  if (predict.type == "response") {
     p = predict(object = .model$learner.model, data = .newdata)
     rowMeans(p$chf)
-  } else {
-    p = predict(object = .model$learner.model, data = .newdata)
-    preds = rowMeans(p$chf)
-    train.times = sort(unique(c(0, .model$learner.model$times)))
-    ptemp = p$survival
-    pos = prodlim::sindex(jump.times = p$unique.death.times, eval.times = train.times)
-    probs = cbind(1, ptemp)[, pos + 1, drop = FALSE]
-    list(preds = preds, probs = probs, train.times = train.times)
-  }
 }

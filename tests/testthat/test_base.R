@@ -32,7 +32,7 @@ test_that("tuneMtryFast", {
   library(mlr)
   library(survival)
   ## test tuneMtryFast
-  learner = makeLearner("classif.tuneMtryFast")
+  learner = makeLearner("classif.tuneMtryFast", predict.type = "prob")
   mod = train(learner, iris.task)
   preds = predict(mod, newdata = getTaskData(iris.task))
   expect_data_frame(preds$data)

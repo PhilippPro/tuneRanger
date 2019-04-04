@@ -8,6 +8,7 @@
 #'
 #' @param formula Object of class formula or character describing the model to fit. Interaction terms supported only for numerical variables.
 #' @param data Training data of class data.frame, matrix, dgCMatrix (Matrix) or gwaa.data (GenABEL).
+#' @param dependent.variable.name Name of dependent variable, needed if no formula given. For survival forests this is the time variable.
 #' @param mtryStart starting value of mtry; default is the same as in \code{\link[ranger]{ranger}}
 #' @param num.treesTry number of trees used at the tuning step
 #' @param stepFactor at each iteration, mtry is inflated (or deflated) by this value
@@ -28,16 +29,15 @@
 #' 
 #' data(iris)
 #' res <- tuneMtryFast(Species ~ ., data = iris, stepFactor = 1.5)
-tuneMtryFast = function (formula, data, mtryStart = floor(sqrt(ncol(data)-1)), 
-  num.treesTry = 50, stepFactor = 2, improve = 0.05, trace = TRUE, plot = TRUE, doBest = FALSE, ...) 
-{
+tuneMtryFast = function (formula = NULL, data = NULL, dependent.variable.name = NULL, mtryStart = floor(sqrt(ncol(data)-1)), 
+  num.treesTry = 50, stepFactor = 2, improve = 0.05, trace = TRUE, plot = TRUE, doBest = FALSE, ...) {
   if (improve < 0) 
     stop("improve must be non-negative.")
   
   #classRF = is.factor(y)
   nvar = ncol(data)-1
   
-  errorOld = ranger(formula, data, mtry = mtryStart, num.trees = num.treesTry, ...)$prediction.error
+  errorOld = ranger(formula, data, mtry = mtryStart, num.trees = num.treesTry, dependent.variable.name = dependent.variable.name, ...)$prediction.error
   
   if (trace) {
     cat("mtry =", mtryStart, " OOB error =", errorOld, "\n")
@@ -62,7 +62,7 @@ tuneMtryFast = function (formula, data, mtryStart = floor(sqrt(ncol(data)-1)),
       }
       if (mtryCur == mtryOld) 
         break
-      errorCur = ranger(formula, data, mtry = mtryStart, num.trees = num.treesTry, ...)$prediction.error
+      errorCur = ranger(formula, data, mtry = mtryStart, num.trees = num.treesTry, dependent.variable.name = dependent.variable.name, ...)$prediction.error
       if (trace) {
         cat("mtry =", mtryCur, "\tOOB error =", errorCur, "\n")
       }
@@ -84,6 +84,6 @@ tuneMtryFast = function (formula, data, mtryStart = floor(sqrt(ncol(data)-1)),
     axis(1, at = res[, "mtry"])
   }
   if (doBest) 
-    res = ranger(formula, data, mtry = res[which.min(res[,2]), 1], ...)
+    res = ranger(formula, data,  dependent.variable.name = dependent.variable.name, mtry = res[which.min(res[,2]), 1], ...)
   return(res)
 }
