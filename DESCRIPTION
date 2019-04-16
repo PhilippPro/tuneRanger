@@ -24,6 +24,6 @@ Imports:
     DiceKriging (>= 1.5.5)
 LazyData: yes
 ByteCompile: yes
-Date: 2019-01-22
+Date: 2019-04-16
 RoxygenNote: 6.1.1
 Suggests: survival, testthat
