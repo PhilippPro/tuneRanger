@@ -109,7 +109,7 @@ xtable(tab2)
 
 # R-squared
 
-plot_results = function(j, log = FALSE, ylab = NULL, legend.pos = NULL) {
+plot_results = function(j, log = FALSE, ylab = NULL, measure = NULL, legend.pos = NULL) {
   ranger_res = matrix(NA, length(resi), 4)
   ranger_res[1, ] = as.numeric(resi[[1]][j, ])
   for(i in 1:length(resi))
@@ -121,7 +121,11 @@ plot_results = function(j, log = FALSE, ylab = NULL, legend.pos = NULL) {
   if(is.null(legend.pos))
     legend.pos = "topleft"
   if(log) {
-    plot(ranger_res[,1], type = "l", xlab = paste("Datasets ordered by", ylab, "of ranger"), ylab = ylab, log = "y", lwd = 2, lty = 2, ylim = range(ranger_res))
+    plot(ranger_res[,1], type = "l", yaxt = "n", xlab = paste("Datasets ordered by", measure, "of ranger"), ylab = ylab, log = "y", lwd = 2, lty = 2, ylim = range(ranger_res))
+    ticks = seq(-1, 4, by=1)
+    labels = sapply(ticks, function(i) as.expression(bquote(10^ .(i))))
+    axis(2, at=c(0.1, 1, 10, 100, 1000, 10000), labels=labels)
+    axis(2, at = c(seq(0.1,1, 0.1), seq(1, 10, 1), seq(10, 100, 10), seq(100, 1000, 100), seq(1000, 10000, 1000), seq(10000, 100000, 10000)), tcl = -0.2, labels = F)
   } else {
     plot(ranger_res[,1], type = "l", xlab = paste("Datasets ordered by", ylab, "of ranger"), ylab = ylab, ylim = c(-0.05,1), lwd = 2, lty = 2)
   }
@@ -150,7 +154,7 @@ dev.off()
 
 pdf("./benchmark/figure/time_results.pdf", height = 4)
 par(mar = c(4, 4, 1, 2) + 0.1)
-plot_results(8, ylab = "Training time in seconds", legend.pos = "bottomright", log = TRUE)
+plot_results(8, ylab = "Training time in seconds (logarithmic scale)", measure = "training time", legend.pos = "bottomright", log = TRUE)
 dev.off()
 
 # mit seed nochmal neu laufen lassen
