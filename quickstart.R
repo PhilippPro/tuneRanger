@@ -16,7 +16,7 @@ res = tuneRanger(iris.task, measure = list(multiclass.brier), num.trees = 1000, 
 
 # Best 5 % of the results
 results = res$results
-results[results$multiclass.brier < quantile(results$multiclass.brier, 0.05),]
+results[results$multiclass.brier < quantile(results$multiclass.brier, 0.05), ]
 
 # Restart after failing in one of the iterations:
 res = restartTuneRanger("./optpath.RData", iris.task, measure = list(multiclass.brier))
