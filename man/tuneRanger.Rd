@@ -4,12 +4,20 @@
 \alias{tuneRanger}
 \title{tuneRanger}
 \usage{
-tuneRanger(task, measure = NULL, iters = 70, iters.warmup = 30,
-  time.budget = NULL, num.threads = NULL, num.trees = 1000,
-  parameters = list(replace = FALSE, respect.unordered.factors =
-  "order"), tune.parameters = c("mtry", "min.node.size",
-  "sample.fraction"), save.file.path = NULL, build.final.model = TRUE,
-  show.info = getOption("mlrMBO.show.info", TRUE))
+tuneRanger(
+  task,
+  measure = NULL,
+  iters = 70,
+  iters.warmup = 30,
+  time.budget = NULL,
+  num.threads = NULL,
+  num.trees = 1000,
+  parameters = list(replace = FALSE, respect.unordered.factors = "order"),
+  tune.parameters = c("mtry", "min.node.size", "sample.fraction"),
+  save.file.path = NULL,
+  build.final.model = TRUE,
+  show.info = getOption("mlrMBO.show.info", TRUE)
+)
 }
 \arguments{
 \item{task}{The mlr task created by \code{\link[mlr]{makeClassifTask}}, \code{\link[mlr]{makeRegrTask}} or \code{\link[mlr]{makeSurvTask}}.}

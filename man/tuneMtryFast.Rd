@@ -4,10 +4,19 @@
 \alias{tuneMtryFast}
 \title{tuneMtryFast}
 \usage{
-tuneMtryFast(formula = NULL, data = NULL,
-  dependent.variable.name = NULL, mtryStart = floor(sqrt(ncol(data) -
-  1)), num.treesTry = 50, stepFactor = 2, improve = 0.05,
-  trace = TRUE, plot = TRUE, doBest = FALSE, ...)
+tuneMtryFast(
+  formula = NULL,
+  data = NULL,
+  dependent.variable.name = NULL,
+  mtryStart = floor(sqrt(ncol(data) - 1)),
+  num.treesTry = 50,
+  stepFactor = 2,
+  improve = 0.05,
+  trace = TRUE,
+  plot = TRUE,
+  doBest = FALSE,
+  ...
+)
 }
 \arguments{
 \item{formula}{Object of class formula or character describing the model to fit. Interaction terms supported only for numerical variables.}
@@ -41,7 +50,7 @@ If doBest=TRUE, it returns the \code{\link[ranger]{ranger}} object produced with
 Similar to tuneRF in \code{\link[randomForest]{randomForest}} but for \code{\link[ranger]{ranger}}.
 }
 \details{
-Provides fast tuning for the mtry hyperparameter.
+Provides fast tuning for the mtry hyperparameter. 
 
 Starting with the default value of mtry, search for the optimal value (with respect to Out-of-Bag error estimate) of mtry for randomForest.
 }

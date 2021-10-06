@@ -4,8 +4,7 @@
 \alias{restartTuneRanger}
 \title{restartTuneRanger}
 \usage{
-restartTuneRanger(save.file.path = "optpath.RData", task,
-  measure = NULL)
+restartTuneRanger(save.file.path = "optpath.RData", task, measure = NULL)
 }
 \arguments{
 \item{save.file.path}{File name in the current working directory to which interim results were saved by \code{\link{tuneRanger}}.}

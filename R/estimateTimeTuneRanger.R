@@ -7,7 +7,6 @@
 #' @param respect.unordered.factors Handling of unordered factor covariates. One of 'ignore', 'order' and 'partition'. 'order' is the default.
 #' @return estimated time for the tuning procedure
 #' @importFrom methods slot<-
-#' @importFrom lubridate period
 #' @export
 #' @examples
 #' estimateTimeTuneRanger(iris.task)
@@ -18,7 +17,7 @@ estimateTimeTuneRanger = function(task, iters = 100, num.threads = 1, num.trees 
   predict.type = ifelse(type == "classif", "prob", "response")
   par.vals = list(num.trees = num.trees, num.threads = num.threads, respect.unordered.factors = respect.unordered.factors, replace = FALSE, mtry = mtry)
   lrn = makeLearner(paste0(type, ".ranger"), par.vals = par.vals, predict.type = predict.type)
-    # Train model and avoid the nasty error message from ranger
+  # Train model and avoid the nasty error message from ranger
   time =  system.time(mod <- catchOrderWarning(mlr::train(lrn, task)))[3]
   
   cat(paste("Approximated time for tuning:", my_seconds_to_period(time * iters + 50)))
@@ -26,17 +25,14 @@ estimateTimeTuneRanger = function(task, iters = 100, num.threads = 1, num.trees 
 }
 
 my_seconds_to_period = function(x) {
-  # from lubridate package
-  span <- as.double(x)
-  remainder <- abs(span)
-  newper <- period(second = rep(0, length(x)))
-  slot(newper, "day") <- remainder%/%(3600 * 24)
-  remainder <- remainder%%(3600 * 24)
-  slot(newper, "hour") <- remainder%/%(3600)
-  remainder <- remainder%%(3600)
-  slot(newper, "minute") <- remainder%/%(60)
-  slot(newper, ".Data") <- round(remainder%%(60),0)
-  newper * sign(span)
+  days = round(x %/% (60 * 60 * 24))
+  hours = round((x - days*60*60*24) %/% (60 * 60))
+  minutes = round((x - days*60*60*24 - hours*60*60) %/% 60)
+  seconds = round(x - days*60*60*24 - hours*60*60 - minutes*60)
+  days_str = ifelse(days == 0, "", paste0(days, "d "))
+  hours_str = ifelse((hours == 0 & days == 0), "", paste0(hours, "H "))
+  minutes_str = ifelse((minutes == 0 & days == 0 & hours == 0), "", paste0(minutes, "M "))
+  seconds_str = paste0(seconds, "S")
+  final_str = paste0(days_str, hours_str, minutes_str, seconds_str)
+  return(final_str)
 }
-
-

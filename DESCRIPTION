@@ -2,7 +2,7 @@ Package: tuneRanger
 Type: Package
 Title: Tune Random Forest of the 'ranger' Package
 Description: Tuning random forest with one line. The package is mainly based on the packages 'ranger' and 'mlrMBO'.
-Version: 0.5
+Version: 0.6
 Authors@R: c(
     person("Philipp", "Probst", email = "philipp_probst@gmx.de", role = c("aut", "cre")),
     person("Simon", "Klau", email = "simonklau@ibe.med.uni-muenchen.de", role = "ctb"))
@@ -13,7 +13,6 @@ Depends:
     ranger (>= 0.8.0),
     mlrMBO (>= 1.1.1),
     parallel (>= 3.3.3),
-    lubridate (>= 1.6.0),
     lhs (>= 0.14)
 Imports:
     mlr (>= 2.11),
@@ -24,6 +23,6 @@ Imports:
     DiceKriging (>= 1.5.5)
 LazyData: yes
 ByteCompile: yes
-Date: 2019-04-16
-RoxygenNote: 6.1.1
+Date: 2021-10-06
+RoxygenNote: 7.1.2
 Suggests: survival, testthat

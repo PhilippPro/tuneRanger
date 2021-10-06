@@ -4,8 +4,13 @@
 \alias{estimateTimeTuneRanger}
 \title{estimateTimeTuneRanger}
 \usage{
-estimateTimeTuneRanger(task, iters = 100, num.threads = 1,
-  num.trees = 1000, respect.unordered.factors = "order")
+estimateTimeTuneRanger(
+  task,
+  iters = 100,
+  num.threads = 1,
+  num.trees = 1000,
+  respect.unordered.factors = "order"
+)
 }
 \arguments{
 \item{task}{The mlr task created by makeClassifTask or makeRegrTask.}
