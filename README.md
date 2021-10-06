@@ -19,7 +19,7 @@ Model based optimization is used as tuning strategy and the three parameters min
 
 The measure that should be optimized can be chosen from the list of measures in mlr: https://mlr-org.github.io/mlr/articles/measures.html
 
-The package is mainly based on [ranger](https://github.com/imbs-hl/ranger), [mlrMBO](http://mlr-org.github.io/mlrMBO/) and [mlr](https://github.com/mlr-org/mlr/#-machine-learning-in-r). 
+The package is mainly based on [ranger](https://github.com/imbs-hl/ranger), [mlrMBO](https://mlrmbo.mlr-org.com/) and [mlr](https://github.com/mlr-org/mlr/#-machine-learning-in-r). 
 
 The package is also described in an arXiv-Paper: [https://arxiv.org/abs/1804.03515](https://arxiv.org/abs/1804.03515)
 
