@@ -2,6 +2,8 @@ library(devtools)
 load_all("../tuneRanger")
 # roxygen2::roxygenise("../tuneRanger")
 # install("../tuneRanger", dependencies = character(0))
+#devtools::test()
+#devtools::check()
 
 # make an mlr task with the specific dataset (here iris)
 # Classification task with makeClassifTask, Regression Task with makeRegrTask

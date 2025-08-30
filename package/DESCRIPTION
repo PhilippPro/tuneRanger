@@ -2,7 +2,7 @@ Package: tuneRanger
 Type: Package
 Title: Tune Random Forest of the 'ranger' Package
 Description: Tuning random forest with one line. The package is mainly based on the packages 'ranger' and 'mlrMBO'.
-Version: 0.7
+Version: 0.8.0
 Authors@R: c(
     person("Philipp", "Probst", email = "philipp_probst@gmx.de", role = c("aut", "cre")),
     person("Simon", "Klau", email = "simonklau@ibe.med.uni-muenchen.de", role = "ctb"))
