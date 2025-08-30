@@ -6,7 +6,7 @@ Philipp Probst
 ## Installation
 The development version
 
-    devtools::install_github("PhilippPro/tuneRanger")
+    devtools::install_github("PhilippPro/tuneRanger/package")
     
  CRAN
 

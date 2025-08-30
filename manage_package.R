@@ -9,4 +9,5 @@ load_all()
 devtools::check()
 devtools::build()
 #?submit_cran
+use_cran_comments()
 devtools::release()
