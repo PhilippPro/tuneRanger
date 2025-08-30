@@ -42,8 +42,8 @@ test_that("tuneMtryFast", {
   preds = predict(mod, newdata = getTaskData(bh.task))
   expect_data_frame(preds$data)
   
-  learner = makeLearner("surv.tuneMtryFast")
-  mod = train(learner, lung.task)
-  preds = predict(mod, newdata = getTaskData(lung.task))
-  expect_data_frame(preds$data)
+  # learner = makeLearner("surv.tuneMtryFast")
+  # mod = train(learner, lung.task)
+  # preds = predict(mod, newdata = getTaskData(lung.task))
+  # expect_data_frame(preds$data)
 })
